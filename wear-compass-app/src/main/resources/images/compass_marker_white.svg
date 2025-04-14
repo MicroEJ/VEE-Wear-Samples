@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+	Copyright 2019-2024 MicroEJ Corp. All rights reserved.
+    MicroEJ Corp. PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+-->
+<svg
+        viewBox="0 0 2 52"
+        version="1.1"
+        id="svg908"
+        sodipodi:docname="compass_marker_white.svg"
+        width="2"
+        height="52"
+        inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <metadata
+            id="metadata912">
+        <rdf:RDF>
+            <cc:Work
+                    rdf:about="">
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type
+                        rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+                <dc:title>marker_flech-2px</dc:title>
+            </cc:Work>
+        </rdf:RDF>
+    </metadata>
+    <sodipodi:namedview
+            pagecolor="#ffffff"
+            bordercolor="#666666"
+            borderopacity="1"
+            objecttolerance="10"
+            gridtolerance="10"
+            guidetolerance="10"
+            inkscape:pageopacity="0"
+            inkscape:pageshadow="2"
+            inkscape:window-width="1680"
+            inkscape:window-height="987"
+            id="namedview910"
+            showgrid="false"
+            inkscape:pagecheckerboard="true"
+            inkscape:zoom="90.509668"
+            inkscape:cx="2.9112912"
+            inkscape:cy="51.359154"
+            inkscape:window-x="-8"
+            inkscape:window-y="66"
+            inkscape:window-maximized="1"
+            inkscape:current-layer="svg908"/>
+    <defs
+            id="defs901"/>
+    <g
+            data-name="Calque 1"
+            id="Calque_1">
+        <path
+                d="M 2,52.003906 H 0 C 0,52.003906 0.463125,0.00390611 0.953125,0.00390611 L 2,52.003906"
+                id="path905"
+                style="fill:#e1e5e7"
+                sodipodi:nodetypes="cccc"/>
+    </g>
+</svg>

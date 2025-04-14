@@ -1,0 +1,7 @@
+# Copyright 2025 MicroEJ Corp.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+/images/heart_icon.svg:VGF
+/images/cursor.svg:VGF
+/images/selected_zone.svg:VGF
+/images/unselected_zone.svg:VGF

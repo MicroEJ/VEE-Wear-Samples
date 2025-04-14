@@ -1,0 +1,7 @@
+# Copyright 2024-2025 MicroEJ Corp.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+/images/sport_background.png:DISPLAY
+/images/sport_preview.png:DISPLAY
+/images/sport_complication_bkg.png:ARGB8888_PRE
+/images/ic_power.png:A8

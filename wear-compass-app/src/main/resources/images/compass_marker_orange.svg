@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+	Copyright 2019-2024 MicroEJ Corp. All rights reserved.
+    MicroEJ Corp. PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+-->
+<svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        viewBox="-15 0 30 112"
+        version="1.1"
+        id="svg851"
+        sodipodi:docname="marker_arrow.svg"
+        width="30"
+        height="112"
+        inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+    <path
+            style="fill:#e8502e"
+            d="M -15,0 V 97.679688 L -0.0390625,112 L 14.921875,97.75 V 0.0703125 H 9.9999995 V 95.435547 L -0.1523435,105.32422 L -10.048828,95.419922 V 0 Z"
+            id="rect842"/>
+</svg>
