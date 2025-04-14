@@ -1,0 +1,5 @@
+# Copyright 2025 MicroEJ Corp.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+/images/icon_empty_135px.png:DISPLAY
+/images/icon_empty_314px.png:DISPLAY

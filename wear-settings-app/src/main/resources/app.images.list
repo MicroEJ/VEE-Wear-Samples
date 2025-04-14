@@ -1,0 +1,11 @@
+# Copyright 2024-2025 MicroEJ Corp.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+/images/ic_add.png:DISPLAY
+/images/ic_battery.png:ARGB4444_PRE
+/images/ic_languages.png:DISPLAY
+/images/ic_radio_fill.png:DISPLAY
+/images/ic_radio.png:DISPLAY
+
+/images/ic_settings_135px.png:DISPLAY
+/images/ic_settings_314px.png:DISPLAY

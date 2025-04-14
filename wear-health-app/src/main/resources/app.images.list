@@ -1,0 +1,15 @@
+# Copyright 2024-2025 MicroEJ Corp.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+/images/button-bkg.png:DISPLAY
+/images/indicator_blank-alpha.png:A8
+/images/ic_arrow-right-circle.png:DISPLAY
+
+/images/ic_step.png:ARGB4444_PRE
+/images/ic_hr.png:ARGB4444_PRE
+/images/ic_calorie.png:ARGB4444_PRE
+/images/ic_sleep.png:ARGB4444_PRE
+/images/ic_spo2.png:ARGB4444_PRE
+
+/images/ic_health_135px.png:DISPLAY
+/images/ic_health_314px.png:DISPLAY

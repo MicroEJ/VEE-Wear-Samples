@@ -1,0 +1,20 @@
+# Copyright 2024-2025 MicroEJ Corp.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+/images/icon_start.png:A4
+/images/icon_pause.png:A4
+/images/icon_stop.png:A4
+/images/icon_stop_disabled.png:ARGB8888_PRE
+/images/icon_lap.png:A4
+
+/images/icon_lap_plus.png:ARGB4444_PRE
+/images/icon_lap_minus.png:ARGB4444_PRE
+
+/images/top_gradient.png:A8
+/images/bottom_gradient.png:A8
+
+/images/left_graphic.png:DISPLAY
+/images/right_graphic.png:DISPLAY
+
+/images/icon_stopwatch_135px.png:DISPLAY
+/images/icon_stopwatch_314px.png:DISPLAY
