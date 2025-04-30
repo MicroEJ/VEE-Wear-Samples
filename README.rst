@@ -22,8 +22,14 @@ To run all the sample applications at once in the simulator, please refer to the
 
 To learn more about application development with the VEE Wear Framework, see https://docs.microej.com/en/latest/VEEWearUserGuide/framework.html.
 
+**Note:** For more information, you can contact `MicroEJ Support <https://www.microej.com/contact/>`_ to get help or evaluate VEE Wear.
+
 Details
 =======
+
+.. image:: https://img.youtube.com/vi/-MYdTW1rGiY/maxresdefault.jpg
+   :alt: UX and navigation video
+   :target: https://youtu.be/-MYdTW1rGiY
 
 Watchfaces: Flower App & Sport App
 ----------------------------------

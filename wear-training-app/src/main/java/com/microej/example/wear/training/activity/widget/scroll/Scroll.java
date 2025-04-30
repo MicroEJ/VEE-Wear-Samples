@@ -7,6 +7,8 @@ package com.microej.example.wear.training.activity.widget.scroll;
 import ej.annotation.Nullable;
 import ej.bon.XMath;
 import ej.microui.MicroUI;
+import ej.motion.Function;
+import ej.motion.quart.QuartEaseOutFunction;
 import ej.mwt.Container;
 import ej.mwt.Widget;
 import ej.mwt.animation.Animator;
@@ -20,7 +22,8 @@ import ej.widget.swipe.Swipeable;
  */
 public class Scroll extends Container {
 
-	public static final int SWIPE_ANIMATION_DURATION = 650;
+	private static final int SWIPE_ANIMATION_DURATION = 500;
+	private static final Function MOTION_FUNCTION = QuartEaseOutFunction.INSTANCE;
 
 	private @Nullable Widget child;
 	private @Nullable Scrollable scrollableChild;
@@ -150,6 +153,7 @@ public class Scroll extends Container {
 			swipeEventHandler.moveTo(this.value);
 			this.swipeEventHandler = swipeEventHandler;
 			this.swipeEventHandler.setDuration(SWIPE_ANIMATION_DURATION);
+			this.swipeEventHandler.setMotionFunction(MOTION_FUNCTION);
 		}
 	}
 

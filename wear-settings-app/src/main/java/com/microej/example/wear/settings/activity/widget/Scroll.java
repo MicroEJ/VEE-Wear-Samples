@@ -8,6 +8,8 @@ import ej.annotation.Nullable;
 import ej.bon.XMath;
 import ej.drawing.ShapePainter.Cap;
 import ej.microui.MicroUI;
+import ej.motion.Function;
+import ej.motion.back.BackEaseOutFunction;
 import ej.mwt.Container;
 import ej.mwt.Widget;
 import ej.mwt.animation.Animator;
@@ -20,6 +22,9 @@ import ej.widget.swipe.Swipeable;
  * Allows to scroll a widget horizontally or vertically.
  */
 public class Scroll extends Container {
+
+	private static final int SWIPE_ANIMATION_DURATION = 400;
+	private static final Function MOTION_FUNCTION = BackEaseOutFunction.INSTANCE;
 
 	private @Nullable Widget child;
 	private @Nullable Scrollable scrollableChild;
@@ -245,6 +250,8 @@ public class Scroll extends Container {
 
 			Animator animator = getDesktop().getAnimator();
 			swipeEventHandler = createSwipeEventHandler(excess, this.horizontal, this.assistant, animator);
+			swipeEventHandler.setDuration(SWIPE_ANIMATION_DURATION);
+			swipeEventHandler.setMotionFunction(MOTION_FUNCTION);
 			swipeEventHandler.setSwipeListener(this.assistant);
 			swipeEventHandler.moveTo(this.value);
 			this.swipeEventHandler = swipeEventHandler;

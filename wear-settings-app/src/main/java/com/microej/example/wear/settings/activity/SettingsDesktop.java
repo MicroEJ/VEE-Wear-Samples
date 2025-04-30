@@ -10,6 +10,7 @@ import com.microej.example.wear.settings.activity.widget.Scroll;
 import com.microej.example.wear.settings.activity.widget.ScrollableList;
 import com.microej.example.wear.settings.activity.widget.VectorLabel;
 import com.microej.wear.KernelServiceProvider;
+import com.microej.wear.services.DeviceService;
 import com.microej.wear.util.renderable.RenderableDesktop;
 import ej.microui.display.Colors;
 import ej.microvg.VectorFont;
@@ -19,7 +20,6 @@ import ej.mwt.style.background.NoBackground;
 import ej.mwt.style.background.RectangularBackground;
 import ej.mwt.style.dimension.OptimalDimension;
 import ej.mwt.style.outline.FlexibleOutline;
-import ej.mwt.style.outline.UniformOutline;
 import ej.mwt.style.outline.border.FlexibleRectangularBorder;
 import ej.mwt.stylesheet.Stylesheet;
 import ej.mwt.stylesheet.cascading.CascadingStylesheet;
@@ -44,11 +44,17 @@ public class SettingsDesktop extends RenderableDesktop {
 	private static final int SECTION_ITEM_TEXT = 1007;
 	private static final int SECTION_ITEM_RADIO_BUTTON = 1008;
 	private static final int SECTION_ITEM_ICON = 1009;
+	private static final int SECTION_ITEM_SUBTITLE = 1010;
 
 	/**
 	 * Creates a settings desktop.
 	 */
 	public SettingsDesktop() {
+		// retrieve device info from DeviceService
+		DeviceService deviceService = KernelServiceProvider.getDeviceService();
+		String deviceName = deviceService.getDeviceName();
+		String deviceAddress = deviceService.getDeviceBluetoothAddress();
+
 		setStylesheet(createStylesheet());
 
 		Scroll scroll = new Scroll(LayoutOrientation.VERTICAL);
@@ -59,6 +65,25 @@ public class SettingsDesktop extends RenderableDesktop {
 		VectorLabel title = new VectorLabel("Settings");
 		title.addClassSelector(TITLE);
 		list.addChild(title);
+
+		List aboutSectionTitle = createSectionTitle("/images/ic_about.png", "About");
+		list.addChild(aboutSectionTitle);
+
+		List deviceInfo = new List(LayoutOrientation.VERTICAL);
+		deviceInfo.addClassSelector(SECTION_BODY);
+		VectorLabel deviceNameSubtitle = new VectorLabel("Device name");
+		deviceNameSubtitle.addClassSelector(SECTION_ITEM_SUBTITLE);
+		VectorLabel deviceNameLabel = new VectorLabel(deviceName);
+		deviceNameLabel.addClassSelector(SECTION_ITEM_TEXT);
+		VectorLabel deviceAddressSubtitle = new VectorLabel("Bluetooth address");
+		deviceAddressSubtitle.addClassSelector(SECTION_ITEM_SUBTITLE);
+		VectorLabel deviceAddressLabel = new VectorLabel(deviceAddress);
+		deviceAddressLabel.addClassSelector(SECTION_ITEM_TEXT);
+		deviceInfo.addChild(deviceNameSubtitle);
+		deviceInfo.addChild(deviceNameLabel);
+		deviceInfo.addChild(deviceAddressSubtitle);
+		deviceInfo.addChild(deviceAddressLabel);
+		list.addChild(deviceInfo);
 
 		List languagesSectionTitle = createSectionTitle("/images/ic_languages.png", "Languages");
 		list.addChild(languagesSectionTitle);
@@ -130,15 +155,15 @@ public class SettingsDesktop extends RenderableDesktop {
 		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, 38);
 		style.setExtraObject(VectorLabel.FONT_STYLE, lightFont);
 		style.setHorizontalAlignment(Alignment.HCENTER);
-		style.setPadding(new FlexibleOutline(34, 0, 17, 0));
+		style.setPadding(new FlexibleOutline(34, 0, 7, 0));
 
 		// Section style
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_TITLE));
-		style.setPadding(new FlexibleOutline(0, 0, 0, 12));
+		style.setPadding(new FlexibleOutline(10, 0, 0, 12));
 		style.setDimension(OptimalDimension.OPTIMAL_DIMENSION_XY);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_TITLE_ICON));
-		style.setPadding(new UniformOutline(8));
+		style.setPadding(new FlexibleOutline(0, 8, 0, 8));
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_TITLE_TEXT));
 		style.setPadding(new FlexibleOutline(0, 0, 0, 4));
@@ -162,6 +187,10 @@ public class SettingsDesktop extends RenderableDesktop {
 		style.setExtraInt(RadioButton.TEXT_SIZE_STYLE, 32);
 		style.setExtraObject(RadioButton.FONT_STYLE, lightFont);
 		style.setVerticalAlignment(Alignment.VCENTER);
+
+		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_ITEM_SUBTITLE));
+		style.setExtraInt(RadioButton.TEXT_SIZE_STYLE, 26);
+		style.setColor(Colors.GRAY);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_ITEM_ICON));
 		style.setPadding(new FlexibleOutline(0, 4, 0, 4));

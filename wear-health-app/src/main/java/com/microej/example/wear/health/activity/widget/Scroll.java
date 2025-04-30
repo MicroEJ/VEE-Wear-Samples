@@ -8,6 +8,8 @@ import ej.annotation.Nullable;
 import ej.bon.XMath;
 import ej.drawing.ShapePainter.Cap;
 import ej.microui.MicroUI;
+import ej.motion.Function;
+import ej.motion.back.BackEaseOutFunction;
 import ej.mwt.Container;
 import ej.mwt.Widget;
 import ej.mwt.animation.Animator;
@@ -20,6 +22,9 @@ import ej.widget.swipe.Swipeable;
  * Allows to scroll a widget horizontally or vertically.
  */
 public class Scroll extends Container {
+
+	private static final int SWIPE_ANIMATION_DURATION = 400;
+	private static final Function MOTION_FUNCTION = BackEaseOutFunction.INSTANCE;
 
 	private @Nullable Widget child;
 	private @Nullable Scrollable scrollableChild;
@@ -35,7 +40,6 @@ public class Scroll extends Container {
 	private @Nullable SwipeEventHandler swipeEventHandler;
 	private final ScrollAssistant assistant;
 	private int value;
-	private boolean shifting;
 	private boolean allowExcess;
 
 	private int childCoordinate;
@@ -74,9 +78,12 @@ public class Scroll extends Container {
 	 * <p>
 	 * The given widget can implement {@link Scrollable} and be notified about when the visible area changes (for
 	 * example for optimization purpose).
+	 * <p>
+	 * Should be called in the UI thread to avoid concurrency issues.
 	 *
 	 * @param child
 	 *            the child to scroll.
+	 * @see MicroUI#isUIThread()
 	 */
 	public void setChild(Widget child) {
 		Widget oldChild = this.child;
@@ -245,6 +252,8 @@ public class Scroll extends Container {
 
 			Animator animator = getDesktop().getAnimator();
 			swipeEventHandler = createSwipeEventHandler(excess, this.horizontal, this.assistant, animator);
+			swipeEventHandler.setDuration(SWIPE_ANIMATION_DURATION);
+			swipeEventHandler.setMotionFunction(MOTION_FUNCTION);
 			swipeEventHandler.setSwipeListener(this.assistant);
 			swipeEventHandler.moveTo(this.value);
 			this.swipeEventHandler = swipeEventHandler;
@@ -261,7 +270,7 @@ public class Scroll extends Container {
 			itemSizes = null;
 		}
 		if (itemSizes != null) {
-			return new SwipeEventHandler(this, itemSizes, false, true, horizontal, assistant, animator);
+			return new SwipeEventHandler(this, itemSizes, false, false, horizontal, assistant, animator);
 		} else {
 			return new SwipeEventHandler(this, size, false, horizontal, assistant, animator);
 		}
@@ -269,43 +278,58 @@ public class Scroll extends Container {
 
 	private int treatExcess(@Nullable Widget child, int contentWidth, int contentHeight, int childOptimalWidth,
 			int childOptimalHeight) {
-		int excess;
-		if (this.horizontal) {
-			excess = childOptimalWidth - contentWidth;
-			int scrollbarHeight = 0;
-			if (excess > 0) {
-				this.scrollbar.setMaximum(excess);
-				if (this.sbVisible) {
-					scrollbarHeight = this.scrollbar.getHeight();
-					this.layOutChild(this.scrollbar, 0, this.sbBeforeContent ? 0 : contentHeight - scrollbarHeight,
-							contentWidth, scrollbarHeight);
+		int excess = computeExcess(contentWidth, contentHeight, childOptimalWidth, childOptimalHeight);
+		int scrollbarWidth = 0;
+		int scrollbarHeight = 0;
+		if (excess > 0) {
+			Scrollbar scrollbar = this.scrollbar;
+			scrollbar.setMaximum(excess);
+			int scrollbarX = 0;
+			int scrollbarY = 0;
+			if (this.sbVisible) {
+				if (this.horizontal) {
+					scrollbarWidth = contentWidth;
+					scrollbarHeight = scrollbar.getHeight();
+					scrollbarY = this.sbBeforeContent ? 0 : contentHeight - scrollbarHeight;
 				} else {
-					this.layOutChild(this.scrollbar, 0, 0, 0, 0);
+					scrollbarWidth = scrollbar.getWidth();
+					scrollbarHeight = contentHeight;
+					scrollbarX = this.sbBeforeContent ? 0 : contentWidth - scrollbarWidth;
 				}
 			}
-			if (child != null) {
-				layOutChild(child, 0, (this.sbBeforeContent && !this.sbOverlap) ? scrollbarHeight : 0,
-						childOptimalWidth, this.sbOverlap ? contentHeight : contentHeight - scrollbarHeight);
-			}
-		} else {
-			excess = childOptimalHeight - contentHeight;
-			int scrollbarWidth = 0;
-			if (excess > 0) {
-				this.scrollbar.setMaximum(excess);
-				if (this.sbVisible) {
-					scrollbarWidth = this.scrollbar.getWidth();
-					this.layOutChild(this.scrollbar, this.sbBeforeContent ? 0 : contentWidth - scrollbarWidth, 0,
-							scrollbarWidth, contentHeight);
-				} else {
-					this.layOutChild(this.scrollbar, 0, 0, 0, 0);
-				}
-			}
-			if (child != null) {
-				layOutChild(child, (this.sbBeforeContent && !this.sbOverlap) ? scrollbarWidth : 0, 0,
-						this.sbOverlap ? contentWidth : contentWidth - scrollbarWidth, childOptimalHeight);
-			}
+			this.layOutChild(scrollbar, scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight);
 		}
+
+		layOutChild(child, contentWidth, contentHeight, childOptimalWidth, childOptimalHeight, scrollbarHeight,
+				scrollbarWidth);
 		return excess;
+	}
+
+	private int computeExcess(int contentWidth, int contentHeight, int childOptimalWidth, int childOptimalHeight) {
+		return this.horizontal ? childOptimalWidth - contentWidth : childOptimalHeight - contentHeight;
+	}
+
+	private void layOutChild(Widget child, int contentWidth, int contentHeight, int childOptimalWidth,
+			int childOptimalHeight, int scrollbarHeight, int scrollbarWidth) {
+		if (child == null) {
+			return;
+		}
+		int childX;
+		int childY;
+		int childWidth;
+		int childHeight;
+		if (this.horizontal) {
+			childX = 0;
+			childY = (this.sbBeforeContent && !this.sbOverlap) ? scrollbarHeight : 0;
+			childWidth = childOptimalWidth;
+			childHeight = this.sbOverlap ? contentHeight : contentHeight - scrollbarHeight;
+		} else {
+			childX = (this.sbBeforeContent && !this.sbOverlap) ? scrollbarWidth : 0;
+			childY = 0;
+			childHeight = childOptimalHeight;
+			childWidth = this.sbOverlap ? contentWidth : contentWidth - scrollbarWidth;
+		}
+		layOutChild(child, childX, childY, childWidth, childHeight);
 	}
 
 	@Override
@@ -320,16 +344,9 @@ public class Scroll extends Container {
 	}
 
 	/**
-	 * Returns the current position.
-	 *
-	 * @return the current position.
-	 */
-	public int getPosition() {
-		return this.value;
-	}
-
-	/**
 	 * Scrolls to an item without animation.
+	 * <p>
+	 * Should be called in the UI thread to avoid concurrency issues.
 	 *
 	 * @param index
 	 *            the item index.
@@ -338,6 +355,7 @@ public class Scroll extends Container {
 	 * @throws UnsupportedOperationException
 	 *             if this scroll content does not provide item sizes.
 	 * @see Scrollable#getItemSizes()
+	 * @see MicroUI#isUIThread()
 	 */
 	public void scrollToIndex(int index) {
 		scrollToIndex(index, false);
@@ -345,6 +363,8 @@ public class Scroll extends Container {
 
 	/**
 	 * Scrolls to an item.
+	 * <p>
+	 * Should be called in the UI thread to avoid concurrency issues.
 	 *
 	 * @param index
 	 *            the item index.
@@ -355,27 +375,9 @@ public class Scroll extends Container {
 	 * @throws UnsupportedOperationException
 	 *             if this scroll content does not provide item sizes.
 	 * @see Scrollable#getItemSizes()
+	 * @see MicroUI#isUIThread()
 	 */
 	public void scrollToIndex(int index, boolean animate) {
-		scrollToIndex(index, animate, SwipeEventHandler.DEFAULT_DURATION);
-	}
-
-	/**
-	 * Scrolls to an item.
-	 *
-	 * @param index
-	 *            the item index.
-	 * @param animate
-	 *            whether the scrolling action should be animated.
-	 * @param duration
-	 *            the duration of the scrolling animation if {@code animate} is {@code true}.
-	 * @throws UnsupportedOperationException
-	 *             if this scroll content is not {@link Scrollable}.
-	 * @throws UnsupportedOperationException
-	 *             if this scroll content does not provide item sizes.
-	 * @see Scrollable#getItemSizes()
-	 */
-	public void scrollToIndex(int index, boolean animate, int duration) {
 		Scrollable child = this.scrollableChild;
 		if (child == null) {
 			throw new UnsupportedOperationException();
@@ -385,52 +387,31 @@ public class Scroll extends Container {
 		for (int i = 0; i < index; i++) {
 			position += itemSizes[i];
 		}
-		scrollTo(position, animate, duration);
+		scrollTo(position, animate);
 	}
 
 	/**
 	 * Scrolls to a position.
+	 * <p>
+	 * Should be called in the UI thread to avoid concurrency issues.
 	 *
 	 * @param position
 	 *            the x or y target (depending on the orientation).
 	 * @param animate
 	 *            whether the scrolling action should be animated.
+	 * @see MicroUI#isUIThread()
 	 */
 	public void scrollTo(int position, boolean animate) {
-		scrollTo(position, animate, SwipeEventHandler.DEFAULT_DURATION);
-	}
-
-	private void scrollTo(int position, boolean animate, int duration) {
 		position = limit(position);
-		scrollToNoLimit(position, animate, duration);
-	}
-
-	private void scrollToNoLimit(int position, boolean animate, long duration) {
 		this.scrollbar.setValue(position);
 		SwipeEventHandler swipeEventHandler = this.swipeEventHandler;
 		if (swipeEventHandler != null) {
 			if (animate) {
-				swipeEventHandler.moveTo(position, duration);
+				swipeEventHandler.moveTo(position, SwipeEventHandler.DEFAULT_DURATION);
 			} else {
 				swipeEventHandler.moveTo(position);
 			}
-		} else {
-			this.assistant.onMove(position);
 		}
-	}
-
-	/**
-	 * Scrolls to a position. The scrolling animation defaults to {@link SwipeEventHandler#DEFAULT_DURATION}.
-	 * <p>
-	 * This method does not limit the position.
-	 *
-	 * @param position
-	 *            the x or y target (depending on the orientation).
-	 * @param animate
-	 *            whether the scrolling action should be animated.
-	 */
-	public void scrollToNoLimit(int position, boolean animate) {
-		scrollToNoLimit(position, animate, SwipeEventHandler.DEFAULT_DURATION);
 	}
 
 	private int limit(int position) {
@@ -451,12 +432,55 @@ public class Scroll extends Container {
 
 	/**
 	 * Scrolls to a position without animation.
+	 * <p>
+	 * Should be called in the UI thread to avoid concurrency issues.
 	 *
 	 * @param position
 	 *            the x or y target (depending on the orientation).
+	 * @see MicroUI#isUIThread()
 	 */
 	public void scrollTo(int position) {
 		scrollTo(position, false);
+	}
+
+	/**
+	 * Scrolls to the beginning of the content.
+	 * <p>
+	 * Should be called in the UI thread to avoid concurrency issues.
+	 *
+	 * @param animate
+	 *            whether the scrolling action should be animated.
+	 * @see MicroUI#isUIThread()
+	 */
+	public void scrollToBeginning(boolean animate) {
+		SwipeEventHandler swipeEventHandler = this.swipeEventHandler;
+		if (swipeEventHandler != null) {
+			if (animate) {
+				swipeEventHandler.moveToBeginning(SwipeEventHandler.DEFAULT_DURATION);
+			} else {
+				swipeEventHandler.moveToBeginning();
+			}
+		}
+	}
+
+	/**
+	 * Scrolls to the end of the content.
+	 * <p>
+	 * Should be called in the UI thread to avoid concurrency issues.
+	 *
+	 * @param animate
+	 *            whether the scrolling action should be animated.
+	 * @see MicroUI#isUIThread()
+	 */
+	public void scrollToEnd(boolean animate) {
+		SwipeEventHandler swipeEventHandler = this.swipeEventHandler;
+		if (swipeEventHandler != null) {
+			if (animate) {
+				swipeEventHandler.moveToEnd(SwipeEventHandler.DEFAULT_DURATION);
+			} else {
+				swipeEventHandler.moveToEnd();
+			}
+		}
 	}
 
 	@Override
@@ -526,7 +550,27 @@ public class Scroll extends Container {
 		return this.sbVisible;
 	}
 
-	class ScrollAssistant implements Runnable, Swipeable, SwipeListener {
+	private void shift() {
+		if (isShown()) {
+			int value = this.value;
+			this.scrollbar.setValue(value);
+
+			int childCoordinate = computeChildCoordinate(value);
+			updateViewport(childCoordinate);
+			this.childCoordinate = childCoordinate;
+		}
+	}
+
+	private int computeChildCoordinate(int value) {
+		Scrollable scrollable = this.scrollableChild;
+		if (scrollable != null && scrollable.snapToItems()) {
+			return -value;
+		} else {
+			return -(value + this.scrollbar.getValue()) / 2;
+		}
+	}
+
+	class ScrollAssistant implements Swipeable, SwipeListener {
 
 		@Override
 		public void onSwipeStarted() {
@@ -535,32 +579,9 @@ public class Scroll extends Container {
 
 		@Override
 		public void onSwipeStopped() {
-			Scroll.this.scrollbar.hide();
-			Scroll.this.scrollbar.requestRender();
-		}
-
-		@Override
-		public void run() {
-			Scroll scroll = Scroll.this;
-			scroll.shifting = false;
-			if (scroll.isShown()) {
-				int value = scroll.value;
-				scroll.scrollbar.setValue(value);
-
-				int childCoordinate = computeChildCoordinate(value);
-				updateViewport(childCoordinate);
-				scroll.childCoordinate = childCoordinate;
-			}
-		}
-
-		private int computeChildCoordinate(int value) {
-			Scroll scroll = Scroll.this;
-			Scrollable scrollable = scroll.scrollableChild;
-			if (scrollable != null && scrollable.snapToItems()) {
-				return -value;
-			} else {
-				return -(value + scroll.scrollbar.getValue()) / 2;
-			}
+			Scrollbar scrollbar = Scroll.this.scrollbar;
+			scrollbar.hide();
+			scrollbar.requestRender();
 		}
 
 		@Override
@@ -568,11 +589,8 @@ public class Scroll extends Container {
 			Scroll scroll = Scroll.this;
 			if (scroll.value != position) {
 				scroll.value = scroll.allowExcess ? position : limit(position);
-				if (!scroll.shifting) {
-					scroll.shifting = true;
-					MicroUI.callSerially(this);
-					requestRender();
-				}
+				scroll.shift();
+				requestRender();
 			}
 		}
 

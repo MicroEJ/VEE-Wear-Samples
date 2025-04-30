@@ -4,7 +4,7 @@
  */
 
 group = "com.microej.example.wear"
-version = "1.0.0"
+version = rootProject.ext.get("samplesVersion") as String
 
 plugins {
 	alias(libs.plugins.microej.application)
