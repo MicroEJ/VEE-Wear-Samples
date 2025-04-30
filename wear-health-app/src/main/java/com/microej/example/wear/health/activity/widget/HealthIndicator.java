@@ -8,6 +8,7 @@ import ej.microui.display.Display;
 import ej.microui.display.GraphicsContext;
 import ej.microui.display.Painter;
 import ej.mwt.Widget;
+import ej.mwt.style.Style;
 import ej.mwt.util.Size;
 
 /**
