@@ -3,30 +3,30 @@
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 group = "com.microej.example.wear"
-version = "1.0.0"
+version = rootProject.ext.get("samplesVersion") as String
 
 plugins {
-    alias(libs.plugins.microej.application)
+	alias(libs.plugins.microej.application)
 }
 
 microej {
-    applicationEntryPoint = "com.microej.example.wear.training.TrainingAppEntryPoint"
+	applicationEntryPoint = "com.microej.example.wear.training.TrainingAppEntryPoint"
 }
 
 dependencies {
-    implementation(libs.microej.edc)
-    implementation(libs.microej.kf)
-    implementation(libs.microej.microui)
-    implementation(libs.microej.drawing)
-    implementation(libs.microej.microvg)
+	implementation(libs.microej.edc)
+	implementation(libs.microej.kf)
+	implementation(libs.microej.microui)
+	implementation(libs.microej.drawing)
+	implementation(libs.microej.microvg)
 
-    implementation(libs.microej.mwt)
-    implementation(libs.microej.widget)
-    implementation(libs.microej.motion)
-    implementation(libs.microej.time)
+	implementation(libs.microej.mwt)
+	implementation(libs.microej.widget)
+	implementation(libs.microej.motion)
+	implementation(libs.microej.time)
 
-    implementation(libs.microej.veewear.services)
-    implementation(libs.microej.veewear.util)
+	implementation(libs.microej.veewear.services)
+	implementation(libs.microej.veewear.util)
 
-    microejVee(rootProject.extra["kernel"] as String)
+	microejVee(rootProject.extra["kernel"] as String)
 }

@@ -4,12 +4,12 @@
  */
 package com.microej.example.wear.health.activity.widget;
 
+import ej.microui.display.Display;
 import ej.microui.display.GraphicsContext;
-import ej.microui.display.Image;
+import ej.microui.display.Painter;
 import ej.mwt.Widget;
 import ej.mwt.style.Style;
 import ej.mwt.util.Size;
-import ej.widget.render.ImagePainter;
 
 /**
  * {@link Widget} that renders a health indicator.
@@ -27,7 +27,8 @@ public class HealthIndicator extends Widget {
 	/** * Good level. */
 	public static final int GOOD = 2;
 
-	private final Image image;
+	// Indicator is 5% of the screen
+	private static final float INDICATOR_SIZE_RATIO = 0.05f;
 
 	private int level;
 
@@ -41,7 +42,6 @@ public class HealthIndicator extends Widget {
 	 */
 	public HealthIndicator(int level) {
 		checkLevel(level);
-		this.image = Image.getImage("/images/indicator_blank-alpha.png");
 		this.level = level;
 	}
 
@@ -60,10 +60,8 @@ public class HealthIndicator extends Widget {
 
 	@Override
 	protected void renderContent(GraphicsContext g, int contentWidth, int contentHeight) {
-		Style style = getStyle();
 		g.setColor(computeColor());
-		ImagePainter.drawImageInArea(g, this.image, 0, 0, contentWidth, contentHeight, style.getHorizontalAlignment(),
-				style.getVerticalAlignment());
+		Painter.fillCircle(g, 0, (contentHeight - contentWidth) / 2, contentWidth);
 	}
 
 	private int computeColor() {
@@ -81,7 +79,9 @@ public class HealthIndicator extends Widget {
 
 	@Override
 	protected void computeContentOptimalSize(Size size) {
-		ImagePainter.computeOptimalSize(this.image, size);
+		Display display = Display.getDisplay();
+		int displayWidth = display.getWidth();
+		size.setSize((int) (displayWidth * INDICATOR_SIZE_RATIO), (int) (displayWidth * INDICATOR_SIZE_RATIO));
 	}
 
 	private static void checkLevel(int level) {

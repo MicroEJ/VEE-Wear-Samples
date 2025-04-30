@@ -8,6 +8,29 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 ------------------
+1.3.0 - 2025-04-30
+------------------
+
+Added
+=====
+
+- Add name and bluetooth address of the device in ``wear-settings-app``.
+
+Changed
+=======
+
+- Optimize vertical scroll in ``wear-health-app``.
+- Change scroll animation speed and motion functions for ``wear-health-app``, ``wear-settings-app`` and ``wear-training-app``.
+- Align all submodules versions with a variable declared in the root ``build.gradle.kts``.
+- Update default kernel to ATS3085S Kernel 1.2.0.
+- Update wear-services dependency to version 1.1.0.
+
+Removed
+=======
+
+- Remove all submodules changelogs, only the root Changelog will be maintained from now on.
+
+------------------
 1.2.0 - 2025-04-14
 ------------------
 

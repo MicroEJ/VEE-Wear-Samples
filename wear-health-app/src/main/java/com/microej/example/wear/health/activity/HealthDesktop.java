@@ -16,14 +16,12 @@ import com.microej.wear.util.renderable.RenderableDesktop;
 import ej.annotation.Nullable;
 import ej.bon.TimerTask;
 import ej.microui.display.Colors;
-import ej.microui.display.Image;
 import ej.microvg.VectorFont;
 import ej.mwt.Desktop;
 import ej.mwt.Widget;
 import ej.mwt.style.EditableStyle;
-import ej.mwt.style.background.ImageBackground;
 import ej.mwt.style.background.NoBackground;
-import ej.mwt.style.background.RectangularBackground;
+import ej.mwt.style.background.RoundedBackground;
 import ej.mwt.style.dimension.FixedDimension;
 import ej.mwt.style.outline.FlexibleOutline;
 import ej.mwt.stylesheet.Stylesheet;
@@ -41,7 +39,7 @@ import ej.widget.container.LayoutOrientation;
  */
 public class HealthDesktop extends RenderableDesktop {
 
-	private static final int UPDATE_PERIOD = 1000;
+	private static final int UPDATE_PERIOD = 2000;
 	private static final int STEPS_GOAL = 10000;
 	private static final int CALORIES_GOAL = 2000;
 
@@ -233,7 +231,7 @@ public class HealthDesktop extends RenderableDesktop {
 		style.setColor(Colors.WHITE);
 
 		style = stylesheet.getSelectorStyle(new TypeSelector(Scroll.class));
-		style.setBackground(new RectangularBackground(Colors.BLACK));
+		style.setBackground(new RoundedBackground(Colors.BLACK, 0, 0));
 
 		style = stylesheet.getSelectorStyle(new TypeSelector(ScrollableList.class));
 		style.setPadding(new FlexibleOutline(0, 8, 84, 8));
@@ -246,8 +244,7 @@ public class HealthDesktop extends RenderableDesktop {
 		style.setPadding(new FlexibleOutline(34, 0, 17, 0));
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(BUTTON_ITEM));
-		style.setBackground(
-				new ImageBackground(Image.getImage("/images/button-bkg.png"), Alignment.HCENTER, Alignment.VCENTER));
+		style.setBackground(new RoundedBackground(0x262a2c, 50, 0));
 		style.setDimension(new FixedDimension(Widget.NO_CONSTRAINT, 84));
 		style.setPadding(new FlexibleOutline(0, 8, 0, 8));
 		style.setMargin(new FlexibleOutline(4, 0, 4, 0));
