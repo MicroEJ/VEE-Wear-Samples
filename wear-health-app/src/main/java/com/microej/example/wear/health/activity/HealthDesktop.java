@@ -21,6 +21,7 @@ import ej.mwt.Desktop;
 import ej.mwt.Widget;
 import ej.mwt.style.EditableStyle;
 import ej.mwt.style.background.NoBackground;
+import ej.mwt.style.background.RectangularBackground;
 import ej.mwt.style.background.RoundedBackground;
 import ej.mwt.style.dimension.FixedDimension;
 import ej.mwt.style.outline.FlexibleOutline;
@@ -231,7 +232,7 @@ public class HealthDesktop extends RenderableDesktop {
 		style.setColor(Colors.WHITE);
 
 		style = stylesheet.getSelectorStyle(new TypeSelector(Scroll.class));
-		style.setBackground(new RoundedBackground(Colors.BLACK, 0, 0));
+		style.setBackground(new RectangularBackground(Colors.BLACK));
 
 		style = stylesheet.getSelectorStyle(new TypeSelector(ScrollableList.class));
 		style.setPadding(new FlexibleOutline(0, 8, 84, 8));
