@@ -40,7 +40,7 @@ To learn more about application development with the VEE Wear Framework, see htt
 Details
 =======
 
-.. image:: https://img.youtube.com/vi/-MYdTW1rGiY/maxresdefault.jpg
+.. image:: images/VEE-Wear-Framework_thumbnail.jpg
    :alt: UX and navigation video
    :target: https://youtu.be/-MYdTW1rGiY
 
