@@ -16,9 +16,22 @@ Overview
 This project provides samples of typical smartwatch applications.
 These applications serve as code examples, demonstrating best practices and how to use the VEE Wear Kernel APIs.
 
+Running on Simulator
+--------------------
+
+To run these applications on simulator, download the `VEE Wear Kernel Virtual Device <https://repository.microej.com/packages/wear/wear-kernel/1.3.0>`_.
+Unzip the Kernel and reference it in the ``build.gradle.kts`` of the application you want to start::
+
+	microejVee(files("path/to/wear-kernel-X.X.X/vee"))
+
 Each sample provides a ``README.md`` that contains instructions on how to run it.
 
 To run all the sample applications at once in the simulator, please refer to the ``README.md`` of the ``wear-runAll-app``.
+
+.. warning::
+
+   There is a `known issue <https://bugs.openjdk.org/browse/JDK-8296654>`__ with JavaFX and Apple Silicon computers. The task ``runOnSimulator`` fails with
+   an error message: ``uncaught exception of type NSException``. Please refer to the `official documentation <https://docs.microej.com/en/latest/VEEPortingGuide/mock.html#javafx>`__ for more information.
 
 To learn more about application development with the VEE Wear Framework, see https://docs.microej.com/en/latest/VEEWearUserGuide/framework.html.
 

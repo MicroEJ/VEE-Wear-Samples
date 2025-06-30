@@ -32,7 +32,6 @@ import ej.mwt.stylesheet.selector.StateSelector;
 import ej.mwt.stylesheet.selector.combinator.AndCombinator;
 import ej.mwt.stylesheet.selector.combinator.Combinator;
 import ej.mwt.util.Alignment;
-import ej.widget.basic.Button;
 import ej.widget.basic.ImageWidget;
 import ej.widget.container.Canvas;
 
@@ -51,7 +50,7 @@ public class StopwatchDesktop extends RenderableDesktop {
 	 * Creates a stopwatch desktop.
 	 *
 	 * @param stopwatch
-	 *			The data manager to use to fetch data from the model.
+	 *            The data manager to use to fetch data from the model.
 	 */
 	public StopwatchDesktop(Stopwatch stopwatch) {
 		super();
@@ -161,7 +160,7 @@ public class StopwatchDesktop extends RenderableDesktop {
 		style.setBorder(new RoundedBorder(Theme.DISABLED_BUTTON_BORDER_COLOR, 90, Theme.BUTTON_BORDER_WIDTH));
 		// buttons when pressed
 		style = stylesheet.getSelectorStyle(new AndCombinator(new ClassSelector(ClassIdentifiers.CONTROL_BUTTON),
-				new StateSelector(Button.ACTIVE)));
+				new StateSelector(StateSelector.ACTIVE)));
 		style.setBackground(new RoundedBackground(Theme.BUTTON_PRESSED_COLOR, 90, 0));
 
 		// margin between buttons
