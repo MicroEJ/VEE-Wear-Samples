@@ -1,6 +1,11 @@
+/*
+ * Java
+ *
+ * Copyright 2025 MicroEJ Corp. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be found with this software.
+ */
 package com.microej.example.wear.training.activity.widget;
 
-import ej.annotation.Nullable;
 import ej.microui.display.GraphicsContext;
 import ej.microvg.Matrix;
 import ej.microvg.VectorGraphicsException;
@@ -16,9 +21,7 @@ import ej.mwt.util.Size;
  */
 public class VectorImageWidget extends Widget {
 
-	private String imagePath;
-	private int scale = 1;
-	@Nullable
+	private int scale;
 	private VectorImage image;
 
 	/**
@@ -32,9 +35,8 @@ public class VectorImageWidget extends Widget {
 	 *             if the image cannot be loaded.
 	 */
 	public VectorImageWidget(String imagePath, int scale) {
-		this.imagePath = imagePath;
 		this.scale = scale;
-		loadImage();
+		this.image = VectorImage.getImage(imagePath);
 	}
 
 	@Override
@@ -59,24 +61,8 @@ public class VectorImageWidget extends Widget {
 	 */
 	protected VectorImageWidget(String imagePath, boolean enabled) {
 		super(enabled);
-		this.imagePath = imagePath;
-	}
-
-	@Override
-	protected void onDetached() {
-		super.onDetached();
-		closeImage();
-	}
-
-	private void loadImage() {
-		this.image = VectorImage.getImage(this.imagePath);
-	}
-
-	private void closeImage() {
-		VectorImage image = this.image;
-		if (image != null) {
-			this.image = null;
-		}
+		this.scale = 1;
+		this.image = VectorImage.getImage(imagePath);
 	}
 
 	/**
@@ -86,11 +72,7 @@ public class VectorImageWidget extends Widget {
 	 *            the resource path of the image to display.
 	 */
 	public void setImagePath(String imagePath) {
-		this.imagePath = imagePath;
-		if (isAttached()) {
-			closeImage();
-			loadImage();
-		}
+		this.image = VectorImage.getImage(imagePath);
 	}
 
 	/**

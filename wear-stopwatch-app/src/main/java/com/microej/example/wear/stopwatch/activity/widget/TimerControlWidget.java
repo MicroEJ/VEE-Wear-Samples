@@ -10,6 +10,9 @@ import com.microej.example.wear.stopwatch.model.Lap;
 import com.microej.example.wear.stopwatch.model.StopWatchEventListener;
 import com.microej.example.wear.stopwatch.model.Stopwatch;
 import com.microej.example.wear.stopwatch.model.TimerState;
+import com.microej.wear.KernelServiceProvider;
+import com.microej.wear.services.ResourceService;
+
 import ej.mwt.Widget;
 import ej.widget.basic.ImageButton;
 import ej.widget.basic.OnClickListener;
@@ -148,7 +151,8 @@ public class TimerControlWidget extends SimpleDock implements StopWatchEventList
 	}
 
 	private Widget createButton(String imagePath, OnClickListener onClick, int... selectors) {
-		ImageButton button = new ImageButton(imagePath);
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		ImageButton button = new ImageButton(resourceService.getImagePath(imagePath));
 		for (int selector : selectors) {
 			button.addClassSelector(selector);
 		}

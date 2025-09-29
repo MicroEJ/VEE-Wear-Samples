@@ -8,14 +8,16 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import com.microej.wear.KernelServiceProvider;
+import com.microej.wear.services.ResourceService;
 import com.microej.wear.services.TimeService;
 import com.microej.wear.util.renderable.RenderableDisplayable;
 
+import ej.annotation.Nullable;
 import ej.microui.display.Colors;
 import ej.microui.display.Display;
 import ej.microui.display.GraphicsContext;
-import ej.microui.display.Image;
 import ej.microui.display.Painter;
+import ej.microui.display.ResourceImage;
 import ej.microvg.LinearGradient;
 import ej.microvg.Matrix;
 import ej.microvg.Path;
@@ -40,7 +42,6 @@ public class FlowerDisplayable extends RenderableDisplayable {
 	private static final float DATE_CIRCLE_RADIUS_RATIO = 0.95f;
 	private static final int TEXT_ANGLE = 165;
 	private static final String SEPARATOR = "  ";
-	private static final String IMAGES_PATH = "/images/";
 	private static final int[] RADAR_SWEEP_GRADIENT_COLORS = new int[] { 0xFF000000, 0xCC000000, 0x00FF007D,
 			0x00000000 };
 	private static final float[] RADAR_SWEEP_GRADIENT_POSITIONS = new float[] { 0, 0.15f, 0.83f, 1f };
@@ -54,25 +55,25 @@ public class FlowerDisplayable extends RenderableDisplayable {
 
 	private final Animator animator;
 	private final Animation animation;
-	private long currentLocalTime;
-	private final Image backgroundImage;
-	private final Image centerImage;
 	private final VectorImage hourHand;
 	private final VectorImage minuteHand;
 	private final VectorImage secondHand;
 	private final Path radarSweepPath;
 	private final LinearGradient radarSweepGradient;
 	private final VectorFont font;
+	private long currentLocalTime;
+	@Nullable
+	private ResourceImage backgroundImage;
+	@Nullable
+	private ResourceImage centerImage;
 
 	/**
 	 * Creates a Flower displayable.
 	 */
 	public FlowerDisplayable() {
-		this.backgroundImage = Image.getImage(IMAGES_PATH + "flower_background.png");
-		this.centerImage = Image.getImage(IMAGES_PATH + "flower_center.png");
-		this.hourHand = VectorImage.getImage(IMAGES_PATH + "flower_hour.xml");
-		this.minuteHand = VectorImage.getImage(IMAGES_PATH + "flower_minute.xml");
-		this.secondHand = VectorImage.getImage(IMAGES_PATH + "flower_second.xml");
+		this.hourHand = VectorImage.getImage("/images/flower_hour.xml");
+		this.minuteHand = VectorImage.getImage("/images/flower_minute.xml");
+		this.secondHand = VectorImage.getImage("/images/flower_second.xml");
 		int radius = Display.getDisplay().getWidth() / 2;
 		this.radarSweepPath = createRadarSweepPath(radius);
 		this.radarSweepGradient = createRadarSweepGradient(radius);
@@ -96,7 +97,9 @@ public class FlowerDisplayable extends RenderableDisplayable {
 		int height = gc.getHeight();
 
 		// render background
-		Painter.drawImage(gc, this.backgroundImage, 0, 0);
+		ResourceImage background = this.backgroundImage;
+		assert (background != null);
+		Painter.drawImage(gc, background, 0, 0);
 
 		// render hands
 		renderHourHand(gc);
@@ -105,14 +108,41 @@ public class FlowerDisplayable extends RenderableDisplayable {
 		renderSecondHand(gc);
 
 		// render center image
-		ImagePainter.drawImageInArea(gc, this.centerImage, 0, 0, width, height, Alignment.HCENTER, Alignment.VCENTER);
+		ResourceImage image = this.centerImage;
+		assert (image != null);
+		ImagePainter.drawImageInArea(gc, image, 0, 0, width, height, Alignment.HCENTER, Alignment.VCENTER);
 
 		// render date
 		renderDate(gc, this.currentLocalTime);
 	}
 
 	@Override
+	public void onAttached() {
+		super.onAttached();
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		this.backgroundImage = ResourceImage.loadImage(resourceService.getImagePath("/images/flower_background.png"));
+		this.centerImage = ResourceImage.loadImage(resourceService.getImagePath("/images/flower_center.png"));
+	}
+
+	@Override
+	public void onDetached() {
+		super.onDetached();
+
+		ResourceImage image = this.backgroundImage;
+		if (image != null) {
+			image.close();
+			this.backgroundImage = null;
+		}
+		image = this.centerImage;
+		if (image != null) {
+			image.close();
+			this.centerImage = null;
+		}
+	}
+
+	@Override
 	protected void onShown() {
+		super.onShown();
 		this.animator.startAnimation(this.animation);
 		updateCurrentTime();
 	}

@@ -8,6 +8,38 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 ------------------
+2.0.0 - 2025-09-29
+------------------
+
+Added
+=====
+
+- Add the Breath application.
+- Add the System application with navigator, watchface picker and activity launcher.
+
+Changed
+=======
+
+- Update MicroEJ SDK plugin to version 1.3.1.
+- Update Kernel dependency to version 2.0.2.
+- Update wear-services dependency to version 2.0.0.
+- Update wear-util dependency to version 2.0.0.
+- Update the UI of the ``wear-weather-app``.
+- Replace the old ``VectorLabel`` with UI pack's ``Label``.
+- Use ``ResourceImage`` whenever possible.
+- Use kernel ``FontServiceProvider`` instead of fonts in resources in ``wear-stopwatch-app``, ``wear-weather-app`` and ``wear-training-app``.
+- Replace ``Scroll`` with ``SwipeContainer`` in ``wear-training-app``.
+- Change all SVG resources to Android Vector Drawables in ``wear-training-app``.
+- Use ``BufferedVectorImage`` to cache drawing of texts in ``wear-health-app`` and ``wear-settings-app`` with custom ``RenderableVectorLabel``.
+- Remove interpolation on swipe in ``wear-health-app`` with custom ``SwipeEventHandler``.
+- Use ``ResourceService`` to load all images.
+
+Fixed
+=====
+
+- Fix code quality issues and null-analysis errors. 
+
+------------------
 1.4.2 - 2025-06-30
 ------------------
 
@@ -23,7 +55,7 @@ Changed
 Changed
 =======
 
-- Use non-deprecated selector in ``wear-stopwatch``.
+- Use non-deprecated selector in ``wear-stopwatch-app``.
 - Update ``Readme`` to document Virtual Device use.
 
 ------------------

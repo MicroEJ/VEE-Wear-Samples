@@ -1,0 +1,22 @@
+# Copyright 2024-2025 MicroEJ Corp.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+/images/small_grid.xml:VGF
+/images/cursor_up.xml:VGF
+/images/cursor_down.xml:VGF
+/images/thunderstorm.xml:VGF
+/images/sun_lit_cloud.xml:VGF
+/images/sun.xml:VGF
+/images/snow.xml:VGF
+/images/shower_rain_2.xml:VGF
+/images/shower_rain.xml:VGF
+/images/rain.xml:VGF
+/images/night_lt_cloud.xml:VGF
+/images/night.xml:VGF
+/images/mist.xml:VGF
+/images/humidity.xml:VGF
+/images/cloud.xml:VGF
+/images/broken_cloud.xml:VGF
+/images/rounded_rectangle.xml:VGF
+/images/dot.xml:VGF
+/images/legendline.xml:VGF

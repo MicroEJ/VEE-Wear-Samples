@@ -6,6 +6,7 @@ package com.microej.example.wear.sport.watchface;
 
 import com.microej.wear.KernelServiceProvider;
 import com.microej.wear.components.ComplicationDataSource;
+import com.microej.wear.services.ResourceService;
 import com.microej.wear.services.TimeService;
 import com.microej.wear.util.renderable.RenderableDisplayable;
 
@@ -16,8 +17,8 @@ import ej.drawing.ShapePainter;
 import ej.microui.display.Colors;
 import ej.microui.display.Display;
 import ej.microui.display.GraphicsContext;
-import ej.microui.display.Image;
 import ej.microui.display.Painter;
+import ej.microui.display.ResourceImage;
 import ej.microui.event.Event;
 import ej.microui.event.generator.Buttons;
 import ej.microui.event.generator.Pointer;
@@ -62,7 +63,6 @@ public class SportDisplayable extends RenderableDisplayable {
 	private static final float COMPLICATION_SHIFT_RATIO = 0.19f;
 
 	private static final int ACCENT_COLOR = 0x00dcf8;
-	private static final String IMAGES_PATH = "/images/";
 	private static final int BACKGROUND_COLOR = 0x303838;
 	private static final float THICKNESS_RATIO = 0.074f;
 	private static final int START_ANGLE = 90;
@@ -77,27 +77,27 @@ public class SportDisplayable extends RenderableDisplayable {
 
 	private final Animator animator;
 	private final Animation animation;
-	private long currentLocalTime;
-	private final Image backgroundImage;
-	private final Image complicationBackgroundImage;
-	private final Image powerImage;
 	private final VectorImage hourHand;
 	private final VectorImage minuteHand;
 	private final VectorImage secondHand;
 	private final VectorFont font;
 	private final Rectangle batteryComplicationBounds;
 	private final Complication[] complications;
+	private long currentLocalTime;
+	@Nullable
+	private ResourceImage backgroundImage;
+	@Nullable
+	private ResourceImage complicationBackgroundImage;
+	@Nullable
+	private ResourceImage powerImage;
 
 	/**
 	 * Creates a Sport displayable.
 	 */
 	public SportDisplayable() {
-		this.backgroundImage = Image.getImage(IMAGES_PATH + "sport_background.png");
-		this.complicationBackgroundImage = Image.getImage(IMAGES_PATH + "sport_complication_bkg.png");
-		this.powerImage = Image.getImage(IMAGES_PATH + "ic_power.png");
-		this.hourHand = VectorImage.getImage(IMAGES_PATH + "sport_hour.xml");
-		this.minuteHand = VectorImage.getImage(IMAGES_PATH + "sport_minute.xml");
-		this.secondHand = VectorImage.getImage(IMAGES_PATH + "sport_second.xml");
+		this.hourHand = VectorImage.getImage("/images/sport_hour.xml");
+		this.minuteHand = VectorImage.getImage("/images/sport_minute.xml");
+		this.secondHand = VectorImage.getImage("/images/sport_second.xml");
 		this.font = KernelServiceProvider.getFontService().getRegularFont();
 
 		Rectangle[] complicationBounds = computeComplicationBounds();
@@ -130,7 +130,54 @@ public class SportDisplayable extends RenderableDisplayable {
 	}
 
 	@Override
+	public void onAttached() {
+		super.onAttached();
+
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		this.backgroundImage = ResourceImage.loadImage(resourceService.getImagePath("/images/sport_background.png"));
+		this.complicationBackgroundImage = ResourceImage
+				.loadImage(resourceService.getImagePath("/images/sport_complication_bkg.png"));
+		this.powerImage = ResourceImage.loadImage(resourceService.getImagePath("/images/ic_power.png"));
+
+		for (Complication complication : this.complications) {
+			ComplicationDataSource source = complication.source;
+			if (source != null && source.hasIcon()) {
+				source.onIconAttached();
+			}
+		}
+	}
+
+	@Override
+	public void onDetached() {
+		super.onDetached();
+
+		ResourceImage image = this.backgroundImage;
+		if (image != null) {
+			image.close();
+			this.backgroundImage = null;
+		}
+		image = this.complicationBackgroundImage;
+		if (image != null) {
+			image.close();
+			this.complicationBackgroundImage = null;
+		}
+		image = this.powerImage;
+		if (image != null) {
+			image.close();
+			this.powerImage = null;
+		}
+
+		for (Complication complication : this.complications) {
+			ComplicationDataSource source = complication.source;
+			if (source != null && source.hasIcon()) {
+				source.onIconDetached();
+			}
+		}
+	}
+
+	@Override
 	protected void onShown() {
+		super.onShown();
 		this.animator.startAnimation(this.animation);
 		updateCurrentTime();
 	}
@@ -142,8 +189,10 @@ public class SportDisplayable extends RenderableDisplayable {
 
 	@Override
 	public void render(GraphicsContext g) {
+		ResourceImage image = this.backgroundImage;
+		assert (image != null);
 		// render the background
-		Painter.drawImage(g, this.backgroundImage, 0, 0);
+		Painter.drawImage(g, image, 0, 0);
 
 		// render the dynamic complications
 		renderDynamicComplications(g);
@@ -213,8 +262,11 @@ public class SportDisplayable extends RenderableDisplayable {
 	private void renderBatteryComplication(GraphicsContext g) {
 		Rectangle bounds = this.batteryComplicationBounds;
 		float progress = KernelServiceProvider.getDeviceService().getBatteryLevel() / 100.0f;
+		ResourceImage complicationBackgroundImageTemp = this.complicationBackgroundImage;
+		ResourceImage powerImageTemp = this.powerImage;
+		assert (complicationBackgroundImageTemp != null && powerImageTemp != null);
 		DottedProgressComplication.render(g, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-				progress, this.complicationBackgroundImage, this.powerImage, this.font, Colors.WHITE);
+				progress, complicationBackgroundImageTemp, powerImageTemp, this.font, Colors.WHITE);
 	}
 
 	private void renderDynamicComplications(GraphicsContext g) {
@@ -225,14 +277,18 @@ public class SportDisplayable extends RenderableDisplayable {
 	}
 
 	private void renderDynamicComplication(GraphicsContext g, Complication complication) {
+
 		Rectangle bounds = complication.bounds;
 		int x = bounds.getX();
 		int y = bounds.getY();
 		int width = bounds.getWidth();
 		int height = bounds.getHeight();
 
+		ResourceImage complicationBackgroundImageTemp = this.complicationBackgroundImage;
+
+		assert (complicationBackgroundImageTemp != null);
 		// render background image
-		Painter.drawImage(g, this.complicationBackgroundImage, x, y);
+		Painter.drawImage(g, complicationBackgroundImageTemp, x, y);
 
 		// get source
 		ComplicationDataSource source = complication.source;
@@ -314,15 +370,23 @@ public class SportDisplayable extends RenderableDisplayable {
 			oldIndex = ArrayTools.getIndex(sources, oldSource);
 		}
 
+		ComplicationDataSource newSource = null;
 		for (int i = oldIndex + 1; i < sources.length; i++) {
-			ComplicationDataSource newSource = sources[i];
-			assert (newSource != null);
-			if (!isComplicationDataSourceUsed(newSource)) {
-				complication.source = newSource;
-				return;
+			ComplicationDataSource source = sources[i];
+			assert (source != null);
+			if (!isComplicationDataSourceUsed(source)) {
+				newSource = source;
+				break;
 			}
 		}
-		complication.source = null;
+
+		if (oldSource != null && oldSource.hasIcon()) {
+			oldSource.onIconDetached();
+		}
+		if (newSource != null && newSource.hasIcon()) {
+			newSource.onIconAttached();
+		}
+		complication.source = newSource;
 	}
 
 	private boolean isComplicationDataSourceUsed(ComplicationDataSource source) {

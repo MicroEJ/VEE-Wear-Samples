@@ -6,13 +6,15 @@ package com.microej.example.wear.health.activity;
 
 import com.microej.example.wear.health.activity.widget.HealthIndicator;
 import com.microej.example.wear.health.activity.widget.ProgressBar;
+import com.microej.example.wear.health.activity.widget.RenderableVectorLabel;
 import com.microej.example.wear.health.activity.widget.Scroll;
 import com.microej.example.wear.health.activity.widget.ScrollableList;
-import com.microej.example.wear.health.activity.widget.VectorLabel;
 import com.microej.wear.KernelServiceProvider;
 import com.microej.wear.services.FontService;
 import com.microej.wear.services.HealthService;
+import com.microej.wear.services.ResourceService;
 import com.microej.wear.util.renderable.RenderableDesktop;
+
 import ej.annotation.Nullable;
 import ej.bon.TimerTask;
 import ej.microui.display.Colors;
@@ -32,6 +34,7 @@ import ej.mwt.stylesheet.selector.TypeSelector;
 import ej.mwt.stylesheet.selector.combinator.AndCombinator;
 import ej.mwt.util.Alignment;
 import ej.widget.basic.ImageWidget;
+import ej.widget.basic.Label;
 import ej.widget.container.Dock;
 import ej.widget.container.LayoutOrientation;
 
@@ -52,14 +55,14 @@ public class HealthDesktop extends RenderableDesktop {
 	private static final int BUTTON_ITEM_INDICATOR = 2006;
 	private static final int BUTTON_ITEM_EXTRA = 2007;
 
-	private final VectorLabel stepsLabel;
+	private final RenderableVectorLabel stepsLabel;
 	private final ProgressBar stepsProgressBar;
-	private final VectorLabel hrLabel;
-	private final VectorLabel caloriesLabel;
+	private final RenderableVectorLabel hrLabel;
+	private final RenderableVectorLabel caloriesLabel;
 	private final HealthIndicator caloriesIndicator;
-	private final VectorLabel sleepLabel;
+	private final RenderableVectorLabel sleepLabel;
 	private final HealthIndicator sleepIndicator;
-	private final VectorLabel spo2Label;
+	private final RenderableVectorLabel spo2Label;
 	private final HealthIndicator spo2Indicator;
 
 	private @Nullable TimerTask task;
@@ -75,32 +78,33 @@ public class HealthDesktop extends RenderableDesktop {
 		ScrollableList scrollableList = new ScrollableList(LayoutOrientation.VERTICAL, false);
 		scroll.setChild(scrollableList);
 
-		VectorLabel title = new VectorLabel("Health");
+		RenderableVectorLabel title = new RenderableVectorLabel("Health");
 		title.addClassSelector(TITLE);
 		scrollableList.addChild(title);
 
 		// create steps
 		HealthService healthService = KernelServiceProvider.getHealthService();
-		VectorLabel todayLabel = new VectorLabel("today");
+		RenderableVectorLabel todayLabel = new RenderableVectorLabel("today");
 		ProgressBar progressBar = new ProgressBar();
 		int stepValue = healthService.getSteps();
 		progressBar.setProgress((float) stepValue / STEPS_GOAL);
-		this.stepsLabel = new VectorLabel(String.valueOf(stepValue));
+		this.stepsLabel = new RenderableVectorLabel(String.valueOf(stepValue));
 		Widget stepItem = createHealthItem("/images/ic_step.png", "Steps", this.stepsLabel, todayLabel, progressBar);
 		this.stepsProgressBar = progressBar;
 		scrollableList.addChild(stepItem);
 
 		// create HR
-		ImageWidget arrow = new ImageWidget("/images/ic_arrow-right-circle.png");
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		ImageWidget arrow = new ImageWidget(resourceService.getImagePath("/images/ic_arrow-right-circle.png"));
 		int hearRateValue = healthService.getHeartRate();
-		this.hrLabel = new VectorLabel(String.valueOf(hearRateValue));
+		this.hrLabel = new RenderableVectorLabel(String.valueOf(hearRateValue));
 		Widget hrItem = createHealthItem("/images/ic_hr.png", "Heart Rate", this.hrLabel, arrow, null);
 		scrollableList.addChild(hrItem);
 
 		// create calories
 		int caloriesPercent = Math.round(100.0f * healthService.getCalories() / CALORIES_GOAL);
 		HealthIndicator caloriesIndicator = new HealthIndicator(computeLevel(caloriesPercent));
-		this.caloriesLabel = new VectorLabel(caloriesPercent + "%");
+		this.caloriesLabel = new RenderableVectorLabel(caloriesPercent + "%");
 		Widget caloriesItem = createHealthItem("/images/ic_calorie.png", "Calories", this.caloriesLabel,
 				caloriesIndicator, null);
 		scrollableList.addChild(caloriesItem);
@@ -110,7 +114,7 @@ public class HealthDesktop extends RenderableDesktop {
 		int sleepDuration = getTotalSleepDuration();
 		String sleepText = (sleepDuration / 60) + "h " + (sleepDuration % 60) + "m";
 		HealthIndicator sleepIndicator = new HealthIndicator(computeSleepLevel(sleepDuration));
-		this.sleepLabel = new VectorLabel(sleepText);
+		this.sleepLabel = new RenderableVectorLabel(sleepText);
 		Widget sleepItem = createHealthItem("/images/ic_sleep.png", "Sleep", this.sleepLabel, sleepIndicator, null);
 		scrollableList.addChild(sleepItem);
 		this.sleepIndicator = sleepIndicator;
@@ -118,12 +122,48 @@ public class HealthDesktop extends RenderableDesktop {
 		// create SpO2
 		int spo2Percent = healthService.getOxygenSaturation();
 		HealthIndicator spo2Indicator = new HealthIndicator(computeLevel(spo2Percent));
-		this.spo2Label = new VectorLabel(spo2Percent + "%");
+		this.spo2Label = new RenderableVectorLabel(spo2Percent + "%");
 		Widget spo2Item = createHealthItem("/images/ic_spo2.png", "SpO2", this.spo2Label, spo2Indicator, null);
 		scrollableList.addChild(spo2Item);
 		this.spo2Indicator = spo2Indicator;
 
 		setWidget(scroll);
+	}
+
+	private static void updateLabel(RenderableVectorLabel label, String text) {
+		label.setText(text);
+		label.requestRender();
+	}
+
+	private static void updateIndicator(HealthIndicator indicator, int level) {
+		indicator.setLevel(level);
+		indicator.requestRender();
+	}
+
+	private static int computeLevel(int value) {
+		if (value < 50) {
+			return HealthIndicator.BAD;
+		} else if (value < 95) {
+			return HealthIndicator.AVERAGE;
+		} else {
+			return HealthIndicator.GOOD;
+		}
+	}
+
+	private static int computeSleepLevel(int value) {
+		if (value < 6 * 60) {
+			return HealthIndicator.BAD;
+		} else if (value < 8 * 60) {
+			return HealthIndicator.AVERAGE;
+		} else {
+			return HealthIndicator.GOOD;
+		}
+	}
+
+	private static int getTotalSleepDuration() {
+		HealthService healthService = KernelServiceProvider.getHealthService();
+		return healthService.getAwakeSleepDuration() + healthService.getRemSleepDuration()
+				+ healthService.getLightSleepDuration() + healthService.getDeepSleepDuration();
 	}
 
 	@Override
@@ -192,12 +232,13 @@ public class HealthDesktop extends RenderableDesktop {
 		}
 	}
 
-	private Widget createHealthItem(String imagePath, String itemName, VectorLabel itemValue, Widget indicator,
-			@Nullable Widget extra) {
+	private Widget createHealthItem(String imagePath, String itemName, RenderableVectorLabel itemValue,
+			Widget indicator, @Nullable Widget extra) {
 		Dock dock = new Dock();
 		dock.addClassSelector(BUTTON_ITEM);
 
-		ImageWidget icon = new ImageWidget(imagePath);
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		ImageWidget icon = new ImageWidget(resourceService.getImagePath(imagePath));
 		icon.addClassSelector(BUTTON_ITEM_ICON);
 		dock.addChildOnLeft(icon);
 
@@ -206,7 +247,7 @@ public class HealthDesktop extends RenderableDesktop {
 			extra.addClassSelector(BUTTON_ITEM_EXTRA);
 		}
 
-		VectorLabel name = new VectorLabel(itemName);
+		RenderableVectorLabel name = new RenderableVectorLabel(itemName);
 		name.addClassSelector(BUTTON_ITEM_NAME);
 		dock.addChildOnLeft(name);
 
@@ -230,6 +271,7 @@ public class HealthDesktop extends RenderableDesktop {
 		EditableStyle style = stylesheet.getDefaultStyle();
 		style.setBackground(NoBackground.NO_BACKGROUND);
 		style.setColor(Colors.WHITE);
+		style.setFont(lightFont.getFont(24));
 
 		style = stylesheet.getSelectorStyle(new TypeSelector(Scroll.class));
 		style.setBackground(new RectangularBackground(Colors.BLACK));
@@ -239,9 +281,8 @@ public class HealthDesktop extends RenderableDesktop {
 
 		// App title
 		style = stylesheet.getSelectorStyle(new ClassSelector(TITLE));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, 38);
+		style.setFont(lightFont.getFont(38));
 		style.setHorizontalAlignment(Alignment.HCENTER);
-		style.setExtraObject(VectorLabel.FONT_STYLE, lightFont);
 		style.setPadding(new FlexibleOutline(34, 0, 17, 0));
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(BUTTON_ITEM));
@@ -254,16 +295,15 @@ public class HealthDesktop extends RenderableDesktop {
 		style.setVerticalAlignment(Alignment.VCENTER);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(BUTTON_ITEM_NAME));
-		style.setPadding(new FlexibleOutline(0, 0, 0, 8));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, 32);
-		style.setExtraObject(VectorLabel.FONT_STYLE, lightFont);
+		style.setPadding(new FlexibleOutline(0, 0, 5, 8));
+		style.setFont(lightFont.getFont(32));
 		style.setVerticalAlignment(Alignment.VCENTER);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(BUTTON_ITEM_VALUE));
 		style.setHorizontalAlignment(Alignment.RIGHT);
 		style.setVerticalAlignment(Alignment.VCENTER);
-		style.setExtraObject(VectorLabel.FONT_STYLE, boldItalicFont);
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, 37);
+		style.setFont(boldItalicFont.getFont(37));
+		style.setPadding(new FlexibleOutline(0, 0, 4, 0));
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(BUTTON_ITEM_INDICATOR));
 		style.setVerticalAlignment(Alignment.VCENTER);
@@ -271,54 +311,18 @@ public class HealthDesktop extends RenderableDesktop {
 		style.setPadding(new FlexibleOutline(0, 17, 0, 17));
 
 		style = stylesheet.getSelectorStyle(
-				new AndCombinator(new ClassSelector(BUTTON_ITEM_INDICATOR), new TypeSelector(VectorLabel.class)));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, 22);
-		style.setExtraObject(VectorLabel.FONT_STYLE, font);
+				new AndCombinator(new ClassSelector(BUTTON_ITEM_INDICATOR), new TypeSelector(Label.class)));
+		style.setFont(font.getFont(22));
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(BUTTON_ITEM_EXTRA));
 		style.setColor(0x4B5357);
 		style.setPadding(new FlexibleOutline(0, 59, 12, 4));
 
 		style = stylesheet.getSelectorStyle(new TypeSelector(ProgressBar.class));
+		style.setDimension(new FixedDimension(Widget.NO_CONSTRAINT, 10));
 		style.setExtraInt(ProgressBar.EXTRA_FIELD_PROGRESS_COLOR, 0x6CC24A);
 		style.setExtraInt(ProgressBar.EXTRA_FIELD_THICKNESS, 10);
 
 		return stylesheet;
-	}
-
-	private static void updateLabel(VectorLabel label, String text) {
-		label.setText(text);
-		label.requestRender();
-	}
-
-	private static void updateIndicator(HealthIndicator indicator, int level) {
-		indicator.setLevel(level);
-		indicator.requestRender();
-	}
-
-	private static int computeLevel(int value) {
-		if (value < 50) {
-			return HealthIndicator.BAD;
-		} else if (value < 95) {
-			return HealthIndicator.AVERAGE;
-		} else {
-			return HealthIndicator.GOOD;
-		}
-	}
-
-	private static int computeSleepLevel(int value) {
-		if (value < 6 * 60) {
-			return HealthIndicator.BAD;
-		} else if (value < 8 * 60) {
-			return HealthIndicator.AVERAGE;
-		} else {
-			return HealthIndicator.GOOD;
-		}
-	}
-
-	private static int getTotalSleepDuration() {
-		HealthService healthService = KernelServiceProvider.getHealthService();
-		return healthService.getAwakeSleepDuration() + healthService.getRemSleepDuration()
-				+ healthService.getLightSleepDuration() + healthService.getDeepSleepDuration();
 	}
 }

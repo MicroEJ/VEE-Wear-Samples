@@ -1,10 +1,5 @@
 # Copyright 2024-2025 MicroEJ Corp.
 # Use of this source code is governed by a BSD-style license that can be found with this software.
 
-/images/background_night.png:DISPLAY
-/images/ic_cloudy.png:ARGB8888_PRE
-/images/ic_few_clouds.png:ARGB8888_PRE
-/images/ic_rainy.png:ARGB8888_PRE
-/images/ic_sunny.png:ARGB8888_PRE
 /images/ic_weather_135px.png:DISPLAY
 /images/ic_weather_314px.png:DISPLAY

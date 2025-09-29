@@ -66,8 +66,9 @@ public class CircleArc {
 	 *            Graphic context.
 	 */
 	public void render(GraphicsContext g) {
-		if (this.gradient != null) {
-			VectorGraphicsPainter.fillGradientPath(g, this.path, this.matrix, this.gradient);
+		LinearGradient gradient = this.gradient;
+		if (gradient != null) {
+			VectorGraphicsPainter.fillGradientPath(g, this.path, this.matrix, gradient);
 		} else {
 			g.setColor(this.color);
 			VectorGraphicsPainter.fillPath(g, this.path, this.matrix);

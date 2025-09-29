@@ -1,0 +1,63 @@
+<!--
+	Copyright 2025 MicroEJ Corp.
+    Use of this source code is governed by a BSD-style license that can be found with this software.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+  <group>
+    <clip-path
+        android:pathData="M0,0h160v160h-160z"/>
+    <path
+        android:pathData="M121,21V31"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFB1"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M116,26H126"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFB1"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M108,14V20"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFB1"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M105,17H111"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFB1"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M83.6,78.3C76.6,62.9 78.5,45.7 87,32.5C78.2,31.2 68.9,32.3 60.1,36.2C35.9,47.1 25.2,75.6 36.2,99.7C47.1,123.9 75.6,134.6 99.7,123.6C108.4,119.6 115.4,113.4 120.2,105.9C104.6,103.6 90.5,93.6 83.5,78.2L83.6,78.3Z">
+      <aapt:attr name="android:fillColor">
+        <gradient 
+            android:startX="52"
+            android:startY="44.9"
+            android:endX="88.3"
+            android:endY="125"
+            android:type="linear">
+          <item android:offset="0" android:color="#FFFFFFB1"/>
+          <item android:offset="1" android:color="#FFE4DD72"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+    <path
+        android:pathData="M51.1,91.1C56.4,90.6 60.1,84 59.4,76.3C58.7,68.6 53.9,62.7 48.6,63.2C43.3,63.7 39.6,70.3 40.3,78C41,85.7 45.8,91.6 51.1,91.1Z"
+        android:fillColor="#DDD464"/>
+    <path
+        android:pathData="M69.5,97.2C72.3,97.2 74.5,95 74.5,92.2C74.5,89.4 72.3,87.2 69.5,87.2C66.7,87.2 64.5,89.4 64.5,92.2C64.5,95 66.7,97.2 69.5,97.2Z"
+        android:fillColor="#DDD464"/>
+  </group>
+</vector>

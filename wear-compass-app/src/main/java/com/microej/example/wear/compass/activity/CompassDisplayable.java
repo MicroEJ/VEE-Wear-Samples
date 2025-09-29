@@ -4,7 +4,12 @@
  */
 package com.microej.example.wear.compass.activity;
 
+import java.util.Random;
+
+import com.microej.wear.KernelServiceProvider;
+import com.microej.wear.services.ResourceService;
 import com.microej.wear.util.renderable.RenderableDisplayable;
+
 import ej.annotation.Nullable;
 import ej.drawing.TransformPainter;
 import ej.microui.MicroUI;
@@ -13,6 +18,7 @@ import ej.microui.display.Display;
 import ej.microui.display.GraphicsContext;
 import ej.microui.display.Image;
 import ej.microui.display.Painter;
+import ej.microui.display.ResourceImage;
 import ej.microvg.Matrix;
 import ej.microvg.VectorFont;
 import ej.microvg.VectorGraphicsPainter;
@@ -24,14 +30,11 @@ import ej.mwt.util.Alignment;
 import ej.widget.motion.MotionAnimation;
 import ej.widget.motion.MotionAnimationListener;
 
-import java.util.Random;
-
 /**
  * Renders the Compass.
  */
 public class CompassDisplayable extends RenderableDisplayable implements MotionAnimationListener {
 
-	private static final String IMAGES_FOLDER = "/images/";
 	private static final int NORTH_ANGLE_LOW = 23;
 	private static final int NORTH_ANGLE_HIGH = 337;
 	private static final int NORTH_EAST_ANGLE = 68;
@@ -51,16 +54,18 @@ public class CompassDisplayable extends RenderableDisplayable implements MotionA
 
 	private final VectorImage whiteMarker;
 	private final VectorImage orangeMarker;
-	private final Image centerImage;
-	private final Image backgroundImage;
 	private final VectorFont font;
 	private final int width;
 	private final int height;
 	private float currentAngle;
 	private final Animator animator;
+	private final Random random;
 	@Nullable
 	private MotionAnimation animation;
-	private final Random random;
+	@Nullable
+	private ResourceImage centerImage;
+	@Nullable
+	private ResourceImage backgroundImage;
 
 	/**
 	 * Creates a Compass displayable.
@@ -72,10 +77,8 @@ public class CompassDisplayable extends RenderableDisplayable implements MotionA
 	 */
 	public CompassDisplayable(VectorFont font, Animator animator) {
 		this.font = font;
-		this.backgroundImage = Image.getImage(IMAGES_FOLDER + "circle_rotate_black.png");
-		this.centerImage = Image.getImage(IMAGES_FOLDER + "compass-center.png");
-		this.orangeMarker = VectorImage.getImage(IMAGES_FOLDER + "compass_marker_orange.svg");
-		this.whiteMarker = VectorImage.getImage(IMAGES_FOLDER + "compass_marker_white.svg");
+		this.orangeMarker = VectorImage.getImage("/images/compass_marker_orange.svg");
+		this.whiteMarker = VectorImage.getImage("/images/compass_marker_white.svg");
 		Display display = Display.getDisplay();
 		this.width = display.getWidth();
 		this.height = display.getHeight();
@@ -104,10 +107,37 @@ public class CompassDisplayable extends RenderableDisplayable implements MotionA
 		int centerY = this.height / 2;
 		g.setColor(Colors.BLACK);
 		Painter.fillRectangle(g, 0, 0, this.width, this.height);
-		TransformPainter.drawRotatedImageBilinear(g, this.backgroundImage, 0, 0, centerX, centerY, this.currentAngle);
+
+		ResourceImage tempBackgroundImage = this.backgroundImage;
+		assert (tempBackgroundImage != null);
+		TransformPainter.drawRotatedImageBilinear(g, tempBackgroundImage, 0, 0, centerX, centerY, this.currentAngle);
 		drawCenterImage(g, centerX, centerY);
 		drawText(g, centerY);
 		drawMarkers(g, centerX, centerY);
+	}
+
+	@Override
+	public void onAttached() {
+		super.onAttached();
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		this.backgroundImage = ResourceImage.loadImage(resourceService.getImagePath("/images/circle_rotate_black.png"));
+		this.centerImage = ResourceImage.loadImage(resourceService.getImagePath("/images/compass-center.png"));
+	}
+
+	@Override
+	public void onDetached() {
+		super.onDetached();
+
+		ResourceImage image = this.backgroundImage;
+		if (image != null) {
+			image.close();
+			this.backgroundImage = null;
+		}
+		image = this.centerImage;
+		if (image != null) {
+			image.close();
+			this.centerImage = null;
+		}
 	}
 
 	@Override
@@ -124,6 +154,7 @@ public class CompassDisplayable extends RenderableDisplayable implements MotionA
 
 	private void drawCenterImage(GraphicsContext g, int centerX, int centerY) {
 		Image image = this.centerImage;
+		assert (image != null);
 		int x = Alignment.computeLeftX(image.getWidth(), centerX, Alignment.HCENTER);
 		int y = Alignment.computeTopY(image.getHeight(), centerY, Alignment.VCENTER);
 		Painter.drawImage(g, image, x, y);
@@ -150,6 +181,7 @@ public class CompassDisplayable extends RenderableDisplayable implements MotionA
 	}
 
 	private void drawMarkers(GraphicsContext g, int centerX, int centerY) {
+
 		int contentSize = Math.min(this.width, this.height);
 		Matrix matrix = new Matrix();
 		VectorImage marker = this.orangeMarker;
@@ -158,7 +190,9 @@ public class CompassDisplayable extends RenderableDisplayable implements MotionA
 		matrix.postTranslate(centerX - marker.getWidth() * scale / 2, 0);
 		VectorGraphicsPainter.drawImage(g, marker, matrix);
 
-		int radius = this.centerImage.getWidth() / 2;
+		ResourceImage image = this.centerImage;
+		assert (image != null);
+		int radius = image.getWidth() / 2;
 		for (int i = 45; i <= 315; i += 90) {
 			drawArrow(g, this.whiteMarker, i, radius, contentSize, centerX, centerY);
 		}
@@ -177,8 +211,9 @@ public class CompassDisplayable extends RenderableDisplayable implements MotionA
 		// use a multiplier to have a decimal angle with finer precision for smooth animation
 		Motion motion = new Motion(SineEaseInOutFunction.INSTANCE, (int) this.currentAngle * MULTIPLIER,
 				this.random.nextInt(360) * MULTIPLIER, ANIMATION_DURATION);
-		this.animation = new MotionAnimation(this.animator, motion, this);
-		this.animation.start();
+		MotionAnimation animation = new MotionAnimation(this.animator, motion, this);
+		this.animation = animation;
+		animation.start();
 	}
 
 	private static String getOrientationText(int angle) {

@@ -19,6 +19,7 @@ dependencies {
 	implementation(libs.microej.kf)
 
 	// list of apps to be started with this app
+	microejApplication(project(":wear-breath-app"))
 	microejApplication(project(":wear-compass-app"))
 	microejApplication(project(":wear-fitness-app"))
 	microejApplication(project(":wear-flower-app"))
@@ -27,6 +28,7 @@ dependencies {
 	microejApplication(project(":wear-settings-app"))
 	microejApplication(project(":wear-sport-app"))
 	microejApplication(project(":wear-stopwatch-app"))
+	microejApplication(project(":wear-system-app"))
 	microejApplication(project(":wear-training-app"))
 	microejApplication(project(":wear-weather-app"))
 

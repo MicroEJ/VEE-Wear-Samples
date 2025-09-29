@@ -6,12 +6,14 @@ package com.microej.example.wear.settings.activity;
 
 import com.microej.example.wear.settings.activity.widget.RadioButton;
 import com.microej.example.wear.settings.activity.widget.RadioButtonGroup;
+import com.microej.example.wear.settings.activity.widget.RenderableVectorLabel;
 import com.microej.example.wear.settings.activity.widget.Scroll;
 import com.microej.example.wear.settings.activity.widget.ScrollableList;
-import com.microej.example.wear.settings.activity.widget.VectorLabel;
 import com.microej.wear.KernelServiceProvider;
 import com.microej.wear.services.DeviceService;
+import com.microej.wear.services.ResourceService;
 import com.microej.wear.util.renderable.RenderableDesktop;
+
 import ej.microui.display.Colors;
 import ej.microvg.VectorFont;
 import ej.mwt.Desktop;
@@ -62,7 +64,7 @@ public class SettingsDesktop extends RenderableDesktop {
 		ScrollableList list = new ScrollableList(LayoutOrientation.VERTICAL, false);
 		scroll.setChild(list);
 
-		VectorLabel title = new VectorLabel("Settings");
+		RenderableVectorLabel title = new RenderableVectorLabel("Settings");
 		title.addClassSelector(TITLE);
 		list.addChild(title);
 
@@ -71,13 +73,13 @@ public class SettingsDesktop extends RenderableDesktop {
 
 		List deviceInfo = new List(LayoutOrientation.VERTICAL);
 		deviceInfo.addClassSelector(SECTION_BODY);
-		VectorLabel deviceNameSubtitle = new VectorLabel("Device name");
+		RenderableVectorLabel deviceNameSubtitle = new RenderableVectorLabel("Device name");
 		deviceNameSubtitle.addClassSelector(SECTION_ITEM_SUBTITLE);
-		VectorLabel deviceNameLabel = new VectorLabel(deviceName);
+		RenderableVectorLabel deviceNameLabel = new RenderableVectorLabel(deviceName);
 		deviceNameLabel.addClassSelector(SECTION_ITEM_TEXT);
-		VectorLabel deviceAddressSubtitle = new VectorLabel("Bluetooth address");
+		RenderableVectorLabel deviceAddressSubtitle = new RenderableVectorLabel("Bluetooth address");
 		deviceAddressSubtitle.addClassSelector(SECTION_ITEM_SUBTITLE);
-		VectorLabel deviceAddressLabel = new VectorLabel(deviceAddress);
+		RenderableVectorLabel deviceAddressLabel = new RenderableVectorLabel(deviceAddress);
 		deviceAddressLabel.addClassSelector(SECTION_ITEM_TEXT);
 		deviceInfo.addChild(deviceNameSubtitle);
 		deviceInfo.addChild(deviceNameLabel);
@@ -115,10 +117,11 @@ public class SettingsDesktop extends RenderableDesktop {
 	private List createSectionTitle(String imagePath, String text) {
 		List list = new List(LayoutOrientation.HORIZONTAL);
 		list.addClassSelector(SECTION_TITLE);
-		ImageWidget icon = new ImageWidget(imagePath);
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		ImageWidget icon = new ImageWidget(resourceService.getImagePath(imagePath));
 		icon.addClassSelector(SECTION_TITLE_ICON);
 		list.addChild(icon);
-		VectorLabel label = new VectorLabel(text);
+		RenderableVectorLabel label = new RenderableVectorLabel(text);
 		label.addClassSelector(SECTION_TITLE_TEXT);
 		list.addChild(label);
 		return list;
@@ -127,10 +130,11 @@ public class SettingsDesktop extends RenderableDesktop {
 	private List createButtonWithIcon(String text, String imagePath) {
 		List list = new List(LayoutOrientation.HORIZONTAL);
 		list.addClassSelector(SECTION_ITEM);
-		VectorLabel label = new VectorLabel(text);
+		RenderableVectorLabel label = new RenderableVectorLabel(text);
 		label.addClassSelector(SECTION_ITEM_TEXT);
 		list.addChild(label);
-		ImageWidget icon = new ImageWidget(imagePath);
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		ImageWidget icon = new ImageWidget(resourceService.getImagePath(imagePath));
 		icon.addClassSelector(SECTION_ITEM_ICON);
 		list.addChild(icon);
 		return list;
@@ -152,8 +156,7 @@ public class SettingsDesktop extends RenderableDesktop {
 
 		// App title
 		style = stylesheet.getSelectorStyle(new ClassSelector(TITLE));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, 38);
-		style.setExtraObject(VectorLabel.FONT_STYLE, lightFont);
+		style.setFont(lightFont.getFont(38));
 		style.setHorizontalAlignment(Alignment.HCENTER);
 		style.setPadding(new FlexibleOutline(34, 0, 7, 0));
 
@@ -167,8 +170,7 @@ public class SettingsDesktop extends RenderableDesktop {
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_TITLE_TEXT));
 		style.setPadding(new FlexibleOutline(0, 0, 0, 4));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, 32);
-		style.setExtraObject(VectorLabel.FONT_STYLE, lightFont);
+		style.setFont(lightFont.getFont(32));
 		style.setVerticalAlignment(Alignment.VCENTER);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_BODY));
@@ -179,8 +181,7 @@ public class SettingsDesktop extends RenderableDesktop {
 		style.setBorder(new FlexibleRectangularBorder(0x262a2c, 1, 0, 0, 0));
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_ITEM_TEXT));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, 32);
-		style.setExtraObject(VectorLabel.FONT_STYLE, lightFont);
+		style.setFont(lightFont.getFont(32));
 		style.setVerticalAlignment(Alignment.VCENTER);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_ITEM_RADIO_BUTTON));
@@ -189,7 +190,9 @@ public class SettingsDesktop extends RenderableDesktop {
 		style.setVerticalAlignment(Alignment.VCENTER);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_ITEM_SUBTITLE));
-		style.setExtraInt(RadioButton.TEXT_SIZE_STYLE, 26);
+		int itemSubtitleSize = 26;
+		style.setFont(lightFont.getFont(itemSubtitleSize));
+		style.setExtraInt(RadioButton.TEXT_SIZE_STYLE, itemSubtitleSize);
 		style.setColor(Colors.GRAY);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(SECTION_ITEM_ICON));

@@ -19,8 +19,6 @@ import ej.mwt.stylesheet.cascading.CascadingStylesheet;
  * A desktop that shows the countdown for the training app.
  */
 public final class TrainingDesktop extends RenderableDesktop {
-	private static final String DEFAULT_FONT = "/fonts/BarlowCondensed-Monospace.ttf";
-	private static final String SEMI_BOLD_FONT = "/fonts/BarlowCondensed-SemiBold.ttf";
 	private final Training training;
 
 	/**
@@ -64,7 +62,7 @@ public final class TrainingDesktop extends RenderableDesktop {
 	 * @return A {@link VectorFont} instance loaded with the default font.
 	 */
 	public static VectorFont getFont() {
-		return VectorFont.loadFont(TrainingDesktop.DEFAULT_FONT);
+		return KernelServiceProvider.getFontService().getMonospaceFont();
 	}
 
 	/**
@@ -82,7 +80,7 @@ public final class TrainingDesktop extends RenderableDesktop {
 	 * @return A {@link VectorFont} instance representing the semi bold font.
 	 */
 	public static VectorFont getSemiBoldFont() {
-		return VectorFont.loadFont(TrainingDesktop.SEMI_BOLD_FONT);
+		return KernelServiceProvider.getFontService().getSemiBoldFont();
 	}
 
 }

@@ -10,7 +10,6 @@ import com.microej.example.wear.training.activity.widget.CircleArc;
 import com.microej.example.wear.training.activity.widget.TimeFormatter;
 import com.microej.example.wear.training.activity.widget.VectorCircularProgressBar;
 import com.microej.example.wear.training.activity.widget.VectorDurationLabel;
-import com.microej.example.wear.training.activity.widget.VectorLabel;
 import com.microej.example.wear.training.activity.widget.VectorLabeledValue;
 import com.microej.example.wear.training.activity.widget.VerticalDivider;
 import com.microej.example.wear.training.model.Training;
@@ -26,10 +25,12 @@ import ej.microui.display.Display;
 import ej.microvg.VectorFont;
 import ej.mwt.style.EditableStyle;
 import ej.mwt.style.background.NoBackground;
+import ej.mwt.style.outline.FlexibleOutline;
 import ej.mwt.stylesheet.cascading.CascadingStylesheet;
 import ej.mwt.stylesheet.selector.ClassSelector;
 import ej.mwt.stylesheet.selector.TypeSelector;
 import ej.mwt.util.Alignment;
+import ej.widget.basic.Label;
 import ej.widget.container.Canvas;
 
 /**
@@ -64,23 +65,21 @@ public class MetricsFragment extends Canvas {
 	private static final int DIVIDER_LAYOUT_WIDTH = 20;
 	private static final int DIVIDER_MARGIN_TOP = 15;
 	private static final String DISTANCE_LABEL = "Distance (km)";
-	private static final String DISTANCE_DEFAULT_VALUE = "0.0";
 	private static final String DISTANCE_PATTERN = "00.00";
 	private static final String DURATION_LABEL = "Duration";
 	private static final String DURATION_PATTERN = "00:00:00";
 	private static final String TIME_PATTERN = "00:00";
 	private static final float STEPS_LENGTH = 0.726f;
-
+	private final Training training;
 	// Widgets
-	private VectorLabeledValue heartRateWidget;
-	private VectorLabeledValue speedWidget;
-	private VectorLabeledValue distanceWidget;
-	private VectorDurationLabel durationWidget;
-	private VectorLabel timeWidget;
+	private final VectorLabeledValue heartRateWidget;
+	private final VectorLabeledValue speedWidget;
+	private final VectorLabeledValue distanceWidget;
+	private final VectorDurationLabel durationWidget;
+	private final Label timeWidget;
 	private VectorCircularProgressBar heartRateProgressBar;
 	@Nullable
 	private TimerTask updateTask;
-	private final Training training;
 	private float latestAvgSpeed;
 	private int refreshSpeedCounter;
 
@@ -94,12 +93,109 @@ public class MetricsFragment extends Canvas {
 		this.training = training;
 		this.latestAvgSpeed = 0.0f;
 		this.refreshSpeedCounter = 0;
+
+		this.heartRateWidget = new VectorLabeledValue(MetricsFragment.HEART_RATE_VALUE_PATTERN,
+				String.valueOf(KernelServiceProvider.getHealthService().getHeartRate()),
+				MetricsFragment.HEART_RATE_LABEL);
+
+		this.speedWidget = new VectorLabeledValue(MetricsFragment.SPEED_PATTERN, MetricsFragment.SPEED_DEFAULT_VALUE,
+				MetricsFragment.SPEED_LABEL);
+
+		this.distanceWidget = new VectorLabeledValue(MetricsFragment.SPEED_PATTERN, MetricsFragment.SPEED_DEFAULT_VALUE,
+				MetricsFragment.DISTANCE_LABEL);
+
+		this.durationWidget = new VectorDurationLabel(this.training.getStartTime());
+		this.durationWidget.addClassSelector(ClassIdentifiers.DURATION_WIDGET);
+
+		this.timeWidget = new Label(TimeFormatter.getCurrentTimeFormatted());
+		this.timeWidget.addClassSelector(ClassIdentifiers.TIME_WIDGET);
+
+		this.heartRateProgressBar = new VectorCircularProgressBar(
+				(float) KernelServiceProvider.getHealthService().getHeartRate() / MetricsFragment.HEART_RATE_GOAL,
+				MetricsFragment.PROGRESS_BAR_START_ANGLE, MetricsFragment.PROGRESS_BAR_MAX_ANGLE);
+
 		buildUI(this);
+	}
+
+	private static VectorCircularProgressBar addProgressBar(float initialValue, Canvas canvas, int availableSize,
+			int centerX, int centerY) {
+		int size = (int) (availableSize * MetricsFragment.HEART_RATE_PROGRESS_RATIO);
+		int x = Alignment.computeLeftX(size, centerX, Alignment.HCENTER);
+		int y = Alignment.computeTopY(size, centerY, Alignment.VCENTER);
+		VectorCircularProgressBar progressBar = new VectorCircularProgressBar(initialValue,
+				MetricsFragment.PROGRESS_BAR_START_ANGLE, MetricsFragment.PROGRESS_BAR_MAX_ANGLE);
+		canvas.addChild(progressBar, x, y, size, size);
+		return progressBar;
+	}
+
+	private static VectorFont getLabelFont() {
+		return KernelServiceProvider.getFontService().getRegularFont();
+	}
+
+	/**
+	 * Training fragment styles.
+	 *
+	 * @param stylesheet
+	 *            the main style sheet instance.
+	 */
+	public static void appendStyles(CascadingStylesheet stylesheet) {
+
+		VectorFont valueFont = TrainingDesktop.getFont();
+		VectorFont labelFont = MetricsFragment.getLabelFont();
+		Display display = Display.getDisplay();
+		int displaySize = Math.min(display.getWidth(), display.getHeight());
+		int valueFontSize = (int) (MetricsFragment.VALUE_FONT_SIZE_RATIO * displaySize);
+		int timeFontSize = (int) (MetricsFragment.TIME_VALUE_FONT_SIZE_RATIO * displaySize);
+		int labelFontSize = (int) (MetricsFragment.LABEL_FONT_SIZE_RATIO * displaySize);
+
+		// default style
+		EditableStyle style = stylesheet.getDefaultStyle();
+		style.setBackground(NoBackground.NO_BACKGROUND);
+
+		// root widget style
+		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.TRAINING_ROOT_WIDGET));
+		style.setBackground(NoBackground.NO_BACKGROUND);
+
+		style = stylesheet.getSelectorStyle(new TypeSelector(VectorLabeledValue.class));
+		style.setColor(Colors.WHITE);
+		style.setHorizontalAlignment(Alignment.HCENTER);
+		style.setExtraObject(VectorLabeledValue.VALUE_FONT_STYLE, valueFont);
+		style.setExtraInt(VectorLabeledValue.VALUE_SIZE_STYLE, valueFontSize);
+		style.setExtraObject(VectorLabeledValue.LABEL_FONT_STYLE, labelFont);
+		style.setExtraInt(VectorLabeledValue.LABEL_SIZE_STYLE, labelFontSize);
+		style.setExtraInt(VectorLabeledValue.LABEL_COLOR_STYLE, VectorLabeledValue.DEFAULT_LABEL_COLOR);
+		style.setMargin(new FlexibleOutline(0, 0, 20, 0));
+
+		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.DURATION_WIDGET));
+		style.setColor(Colors.WHITE);
+		style.setHorizontalAlignment(Alignment.HCENTER);
+		style.setExtraObject(VectorDurationLabel.VALUE_FONT_STYLE, valueFont);
+		style.setExtraInt(VectorDurationLabel.VALUE_SIZE_STYLE, valueFontSize);
+		style.setExtraObject(VectorDurationLabel.LABEL_FONT_STYLE, labelFont);
+		style.setExtraInt(VectorDurationLabel.LABEL_SIZE_STYLE, labelFontSize);
+		style.setExtraInt(VectorDurationLabel.LABEL_COLOR_STYLE, VectorDurationLabel.DEFAULT_LABEL_COLOR);
+
+		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.TIME_WIDGET));
+		style.setColor(MetricsFragment.TIME_COLOR);
+		style.setHorizontalAlignment(Alignment.HCENTER);
+		style.setFont(TrainingDesktop.getSemiBoldFont().getFont(timeFontSize));
+
+		// steps progress style
+		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.HEART_RATE_PROGRESS));
+		CircleArc.GradientStyle gradientStyle = new CircleArc.GradientStyle(
+				new int[] { 0xff66ff33, 0xffffff00, 0xffff3300 }, new float[] { 0.04f, 0.4f, 1 }, -160);
+		CircleArc.CircleArcBuilder circleArcBuilder = new CircleArc.CircleArcBuilder(gradientStyle,
+				MetricsFragment.ARC_THICKNESS, ShapePainter.Cap.ROUNDED);
+		style.setExtraObject(VectorCircularProgressBar.CIRCLE_ARC_STYLE, circleArcBuilder);
+		circleArcBuilder = new CircleArc.CircleArcBuilder(MetricsFragment.ARC_BACKGROUND_COLOR,
+				MetricsFragment.ARC_THICKNESS, ShapePainter.Cap.ROUNDED);
+		style.setExtraObject(VectorCircularProgressBar.BACKGROUND_CIRCLE_ARC_STYLE, circleArcBuilder);
 	}
 
 	@Override
 	protected void onShown() {
 		super.onShown();
+		updateValues();
 		startUpdateTask();
 	}
 
@@ -115,16 +211,15 @@ public class MetricsFragment extends Canvas {
 	public void startUpdateTask() {
 		stopUpdateTask();
 
-		TimerTask updateTask = new TimerTask() {
+		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
 				updateValues();
 				updateDuration();
 			}
 		};
-		this.updateTask = updateTask;
-		KernelServiceProvider.getTimer().schedule(updateTask, MetricsFragment.UPDATE_PERIOD,
-				MetricsFragment.UPDATE_PERIOD);
+		this.updateTask = task;
+		KernelServiceProvider.getTimer().schedule(task, MetricsFragment.UPDATE_PERIOD, MetricsFragment.UPDATE_PERIOD);
 	}
 
 	/**
@@ -138,9 +233,9 @@ public class MetricsFragment extends Canvas {
 	 * Stops the currently running periodic update task, if any.
 	 */
 	public void stopUpdateTask() {
-		TimerTask updateTask = this.updateTask;
-		if (updateTask != null) {
-			updateTask.cancel();
+		TimerTask task = this.updateTask;
+		if (task != null) {
+			task.cancel();
 			this.updateTask = null;
 		}
 	}
@@ -173,12 +268,11 @@ public class MetricsFragment extends Canvas {
 
 		HealthService healthService = KernelServiceProvider.getHealthService();
 
-		String heartRateTextValue = String.valueOf(healthService.getHeartRate());
 		float initialHeartRateProgress = (float) healthService.getHeartRate() / MetricsFragment.HEART_RATE_GOAL;
 
 		addHeartRateProgress(initialHeartRateProgress, canvas, displaySize, displayWidth, displayHeight);
 		addTimeWidget(canvas, displaySize);
-		addHeartRateWidget(heartRateTextValue, canvas, displaySize);
+		addHeartRateWidget(canvas, displaySize);
 		addSpeedWidget(canvas, displaySize);
 		addVerticalDivider(canvas, displaySize);
 		addDistanceWidget(canvas, displaySize);
@@ -191,16 +285,14 @@ public class MetricsFragment extends Canvas {
 		float timeFontSize = MetricsFragment.TIME_VALUE_FONT_SIZE_RATIO * displaySize;
 		int widgetWidth = (int) timeFont.measureStringWidth(MetricsFragment.TIME_PATTERN, timeFontSize);
 		int widgetHeight = (int) timeFont.getHeight(timeFontSize);
-		VectorLabel timeLabeledValue = new VectorLabel(TimeFormatter.getCurrentTimeFormatted());
-		timeLabeledValue.addClassSelector(ClassIdentifiers.TIME_WIDGET);
+
 		int labelY = (int) (MetricsFragment.TIME_LABEL_Y_RATIO * displaySize);
 
 		int labelX = Alignment.computeLeftX(widgetWidth, 0, displaySize, Alignment.HCENTER);
-		canvas.addChild(timeLabeledValue, labelX, labelY, widgetWidth, widgetHeight);
-		this.timeWidget = timeLabeledValue;
+		canvas.addChild(this.timeWidget, labelX, labelY, widgetWidth, widgetHeight);
 	}
 
-	private void addHeartRateWidget(String initialValue, Canvas canvas, int displaySize) {
+	private void addHeartRateWidget(Canvas canvas, int displaySize) {
 		// Heart rate widget.
 		VectorFont valueFont = TrainingDesktop.getFont();
 		VectorFont labelFont = MetricsFragment.getLabelFont();
@@ -212,15 +304,12 @@ public class MetricsFragment extends Canvas {
 				+ MetricsFragment.TEXT_GAP;
 		int valueWidth = (int) valueFont.measureStringWidth(MetricsFragment.HEART_RATE_VALUE_PATTERN, valueFontSize)
 				+ MetricsFragment.TEXT_GAP;
-		VectorLabeledValue heartRateLabeledValue = new VectorLabeledValue(MetricsFragment.HEART_RATE_VALUE_PATTERN,
-				initialValue, MetricsFragment.HEART_RATE_LABEL);
 		int widgetWidth = Math.max(labelWidth, valueWidth);
 		int labelY = (int) (MetricsFragment.WIDGET_Y_RATIO * displaySize)
 				+ MetricsFragment.HEART_RATE_WIDGET_PADDING_TOP;
 		int labelX = Alignment.computeLeftX(widgetWidth, 0, displaySize, Alignment.HCENTER);
-		canvas.addChild(heartRateLabeledValue, labelX, labelY, widgetWidth,
+		canvas.addChild(this.heartRateWidget, labelX, labelY, widgetWidth,
 				valueFontHeight + labelFontHeight + MetricsFragment.TEXT_GAP);
-		this.heartRateWidget = heartRateLabeledValue;
 	}
 
 	private void addDurationWidget(Canvas canvas, int displaySize) {
@@ -235,15 +324,13 @@ public class MetricsFragment extends Canvas {
 				+ MetricsFragment.TEXT_GAP;
 		int valueWidth = (int) valueFont.measureStringWidth(MetricsFragment.DURATION_PATTERN, valueFontSize)
 				+ MetricsFragment.TEXT_GAP;
-		VectorDurationLabel durationLabeledValue = new VectorDurationLabel(this.training.getStartTime());
-		durationLabeledValue.addClassSelector(ClassIdentifiers.DURATION_WIDGET);
+
 		int labelY = (int) (MetricsFragment.WIDGET_Y_RATIO * displaySize) * 3
 				+ MetricsFragment.WIDGET_VERTICAL_INTER_MARGIN;
 		int widgetWidth = Math.max(labelWidth, valueWidth);
 		int labelX = Alignment.computeLeftX(widgetWidth, 0, displaySize, Alignment.HCENTER);
-		canvas.addChild(durationLabeledValue, labelX, labelY, widgetWidth,
+		canvas.addChild(this.durationWidget, labelX, labelY, widgetWidth,
 				valueFontHeight + labelFontHeight + MetricsFragment.TEXT_GAP);
-		this.durationWidget = durationLabeledValue;
 	}
 
 	private void addVerticalDivider(Canvas canvas, int displaySize) {
@@ -269,16 +356,14 @@ public class MetricsFragment extends Canvas {
 				+ MetricsFragment.TEXT_GAP;
 		int valueWidth = (int) valueFont.measureStringWidth(MetricsFragment.SPEED_PATTERN, valueFontSize)
 				+ MetricsFragment.TEXT_GAP;
-		VectorLabeledValue speedLabeledValue = new VectorLabeledValue(MetricsFragment.SPEED_PATTERN,
-				MetricsFragment.SPEED_DEFAULT_VALUE, MetricsFragment.SPEED_LABEL);
+
 		int labelY = (int) (MetricsFragment.WIDGET_Y_RATIO * displaySize) * 2
 				+ MetricsFragment.WIDGET_VERTICAL_INTER_MARGIN;
 		int widgetWidth = Math.max(labelWidth, valueWidth);
 		int labelX = Alignment.computeLeftX(widgetWidth, 0, displaySize, Alignment.LEFT)
 				+ MetricsFragment.WIDGET_HORIZONTAL_MARGIN;
-		canvas.addChild(speedLabeledValue, labelX, labelY, widgetWidth,
+		canvas.addChild(this.speedWidget, labelX, labelY, widgetWidth,
 				valueFontHeight + labelFontHeight + MetricsFragment.TEXT_GAP);
-		this.speedWidget = speedLabeledValue;
 	}
 
 	private void addDistanceWidget(Canvas canvas, int displaySize) {
@@ -293,36 +378,22 @@ public class MetricsFragment extends Canvas {
 				+ MetricsFragment.TEXT_GAP;
 		int valueWidth = (int) valueFont.measureStringWidth(MetricsFragment.DISTANCE_PATTERN, valueFontSize)
 				+ MetricsFragment.TEXT_GAP;
-		VectorLabeledValue distanceLabeledValue = new VectorLabeledValue(MetricsFragment.DISTANCE_PATTERN,
-				MetricsFragment.DISTANCE_DEFAULT_VALUE, MetricsFragment.DISTANCE_LABEL);
+
 		int labelY = (int) (MetricsFragment.WIDGET_Y_RATIO * displaySize) * 2
 				+ (MetricsFragment.WIDGET_VERTICAL_INTER_MARGIN);
 		int widgetWidth = Math.max(labelWidth, valueWidth);
 		int labelX = Alignment.computeLeftX(widgetWidth, 0, displaySize, Alignment.RIGHT)
 				- MetricsFragment.WIDGET_HORIZONTAL_MARGIN;
-		canvas.addChild(distanceLabeledValue, labelX, labelY, widgetWidth,
+		canvas.addChild(this.distanceWidget, labelX, labelY, widgetWidth,
 				valueFontHeight + labelFontHeight + MetricsFragment.TEXT_GAP);
-		this.distanceWidget = distanceLabeledValue;
 	}
 
 	private void addHeartRateProgress(float initialValue, Canvas canvas, int displaySize, int displayWidth,
 			int displayHeight) {
 		int centerX = displayWidth / 2;
 		int centerY = displayHeight / 2;
-		this.heartRateProgressBar = MetricsFragment.addProgressBar(initialValue, canvas, displaySize,
-				MetricsFragment.HEART_RATE_PROGRESS_RATIO, centerX, centerY);
+		this.heartRateProgressBar = MetricsFragment.addProgressBar(initialValue, canvas, displaySize, centerX, centerY);
 		this.heartRateProgressBar.addClassSelector(ClassIdentifiers.HEART_RATE_PROGRESS);
-	}
-
-	private static VectorCircularProgressBar addProgressBar(float initialValue, Canvas canvas, int availableSize,
-			float widgetRatio, int centerX, int centerY) {
-		int size = (int) (availableSize * widgetRatio);
-		int x = Alignment.computeLeftX(size, centerX, Alignment.HCENTER);
-		int y = Alignment.computeTopY(size, centerY, Alignment.VCENTER);
-		VectorCircularProgressBar progressBar = new VectorCircularProgressBar(initialValue,
-				MetricsFragment.PROGRESS_BAR_START_ANGLE, MetricsFragment.PROGRESS_BAR_MAX_ANGLE);
-		canvas.addChild(progressBar, x, y, size, size);
-		return progressBar;
 	}
 
 	private void updateValues() {
@@ -380,70 +451,5 @@ public class MetricsFragment extends Canvas {
 			this.latestAvgSpeed = avgSpeedKmPerHour;
 			return String.valueOf(avgSpeedKmPerHour);
 		}
-
-	}
-
-	private static VectorFont getLabelFont() {
-		return KernelServiceProvider.getFontService().getRegularFont();
-	}
-
-	/**
-	 * Training fragment styles.
-	 *
-	 * @param stylesheet
-	 *            the main style sheet instance.
-	 */
-	public static void appendStyles(CascadingStylesheet stylesheet) {
-
-		VectorFont valueFont = TrainingDesktop.getFont();
-		VectorFont labelFont = MetricsFragment.getLabelFont();
-		Display display = Display.getDisplay();
-		int displaySize = Math.min(display.getWidth(), display.getHeight());
-		int valueFontSize = (int) (MetricsFragment.VALUE_FONT_SIZE_RATIO * displaySize);
-		int timeFontSize = (int) (MetricsFragment.TIME_VALUE_FONT_SIZE_RATIO * displaySize);
-		int labelFontSize = (int) (MetricsFragment.LABEL_FONT_SIZE_RATIO * displaySize);
-
-		// default style
-		EditableStyle style = stylesheet.getDefaultStyle();
-		style.setBackground(NoBackground.NO_BACKGROUND);
-
-		// root widget style
-		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.TRAINING_ROOT_WIDGET));
-		style.setBackground(NoBackground.NO_BACKGROUND);
-
-		style = stylesheet.getSelectorStyle(new TypeSelector(VectorLabeledValue.class));
-		style.setColor(Colors.WHITE);
-		style.setHorizontalAlignment(Alignment.HCENTER);
-		style.setExtraObject(VectorLabeledValue.VALUE_FONT_STYLE, valueFont);
-		style.setExtraInt(VectorLabeledValue.VALUE_SIZE_STYLE, valueFontSize);
-		style.setExtraObject(VectorLabeledValue.LABEL_FONT_STYLE, labelFont);
-		style.setExtraInt(VectorLabeledValue.LABEL_SIZE_STYLE, labelFontSize);
-		style.setExtraInt(VectorLabeledValue.LABEL_COLOR_STYLE, VectorLabeledValue.DEFAULT_LABEL_COLOR);
-
-		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.DURATION_WIDGET));
-		style.setColor(Colors.WHITE);
-		style.setHorizontalAlignment(Alignment.HCENTER);
-		style.setExtraObject(VectorDurationLabel.VALUE_FONT_STYLE, valueFont);
-		style.setExtraInt(VectorDurationLabel.VALUE_SIZE_STYLE, valueFontSize);
-		style.setExtraObject(VectorDurationLabel.LABEL_FONT_STYLE, labelFont);
-		style.setExtraInt(VectorDurationLabel.LABEL_SIZE_STYLE, labelFontSize);
-		style.setExtraInt(VectorDurationLabel.LABEL_COLOR_STYLE, VectorDurationLabel.DEFAULT_LABEL_COLOR);
-
-		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.TIME_WIDGET));
-		style.setColor(MetricsFragment.TIME_COLOR);
-		style.setHorizontalAlignment(Alignment.HCENTER);
-		style.setExtraObject(VectorLabel.FONT_STYLE, TrainingDesktop.getSemiBoldFont());
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, timeFontSize);
-
-		// steps progress style
-		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.HEART_RATE_PROGRESS));
-		CircleArc.GradientStyle gradientStyle = new CircleArc.GradientStyle(
-				new int[] { 0xff66ff33, 0xffffff00, 0xffff3300 }, new float[] { 0.04f, 0.4f, 1 }, -160);
-		CircleArc.CircleArcBuilder circleArcBuilder = new CircleArc.CircleArcBuilder(gradientStyle,
-				MetricsFragment.ARC_THICKNESS, ShapePainter.Cap.ROUNDED);
-		style.setExtraObject(VectorCircularProgressBar.CIRCLE_ARC_STYLE, circleArcBuilder);
-		circleArcBuilder = new CircleArc.CircleArcBuilder(MetricsFragment.ARC_BACKGROUND_COLOR,
-				MetricsFragment.ARC_THICKNESS, ShapePainter.Cap.ROUNDED);
-		style.setExtraObject(VectorCircularProgressBar.BACKGROUND_CIRCLE_ARC_STYLE, circleArcBuilder);
 	}
 }

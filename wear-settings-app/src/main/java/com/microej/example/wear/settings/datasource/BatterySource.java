@@ -6,24 +6,20 @@ package com.microej.example.wear.settings.datasource;
 
 import com.microej.wear.KernelServiceProvider;
 import com.microej.wear.components.ComplicationDataSource;
+import com.microej.wear.services.ResourceService;
 
+import ej.annotation.Nullable;
 import ej.drawing.TransformPainter;
 import ej.microui.display.GraphicsContext;
 import ej.microui.display.Image;
+import ej.microui.display.ResourceImage;
 
 /**
  * {@link com.microej.wear.components.ComplicationDataSource} which provides battery data.
  */
 public class BatterySource implements ComplicationDataSource {
 
-	private final Image iconImage;
-
-	/**
-	 * Creates a battery source.
-	 */
-	public BatterySource() {
-		this.iconImage = Image.getImage("/images/ic_battery.png");
-	}
+	private @Nullable ResourceImage iconImage;
 
 	@Override
 	public boolean hasText() {
@@ -47,15 +43,32 @@ public class BatterySource implements ComplicationDataSource {
 	}
 
 	@Override
+	public void onIconAttached() {
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		this.iconImage = ResourceImage.loadImage(resourceService.getImagePath("/images/ic_battery.png"));
+	}
+
+	@Override
+	public void onIconDetached() {
+		ResourceImage iconImage = this.iconImage;
+		if (iconImage != null) {
+			iconImage.close();
+			this.iconImage = null;
+		}
+	}
+
+	@Override
 	public void renderIcon(GraphicsContext g, int x, int y, int width, int height) {
 		Image image = this.iconImage;
-		int imageWidth = image.getWidth();
-		int imageHeight = image.getHeight();
-		float scale = Math.min((float) width / imageWidth, (float) height / imageHeight);
-		int imageScaledWidth = (int) (scale * imageWidth);
-		int imageScaledHeight = (int) (scale * imageHeight);
-		TransformPainter.drawScaledImageBilinear(g, image, x + (width - imageScaledWidth) / 2,
-				y + (height - imageScaledHeight) / 2, scale, scale);
+		if (image != null) {
+			int imageWidth = image.getWidth();
+			int imageHeight = image.getHeight();
+			float scale = Math.min((float) width / imageWidth, (float) height / imageHeight);
+			int imageScaledWidth = (int) (scale * imageWidth);
+			int imageScaledHeight = (int) (scale * imageHeight);
+			TransformPainter.drawScaledImageBilinear(g, image, x + (width - imageScaledWidth) / 2,
+					y + (height - imageScaledHeight) / 2, scale, scale);
+		}
 	}
 
 	@Override

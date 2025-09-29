@@ -10,9 +10,11 @@ import com.microej.example.wear.stopwatch.activity.style.Theme;
 import com.microej.example.wear.stopwatch.activity.widget.LapScrollWidget;
 import com.microej.example.wear.stopwatch.activity.widget.TimerControlWidget;
 import com.microej.example.wear.stopwatch.activity.widget.TimerWidget;
-import com.microej.example.wear.stopwatch.activity.widget.VectorLabel;
 import com.microej.example.wear.stopwatch.model.Stopwatch;
+import com.microej.wear.KernelServiceProvider;
+import com.microej.wear.services.ResourceService;
 import com.microej.wear.util.renderable.RenderableDesktop;
+
 import ej.microui.display.Colors;
 import ej.microui.display.Display;
 import ej.microvg.VectorFont;
@@ -40,7 +42,6 @@ import ej.widget.container.Canvas;
  */
 public class StopwatchDesktop extends RenderableDesktop {
 
-	private static final String DEFAULT_FONT = "/fonts/BarlowCondensed-Monospace.ttf";
 	private static final String LEFT_GRAPHIC = "/images/left_graphic.png";
 	private static final String RIGHT_GRAPHIC = "/images/right_graphic.png";
 
@@ -68,8 +69,9 @@ public class StopwatchDesktop extends RenderableDesktop {
 		root.addClassSelector(ClassIdentifiers.DESKTOP_ROOT);
 
 		// side graphics
-		ImageWidget leftGraphic = new ImageWidget(LEFT_GRAPHIC);
-		ImageWidget rightGraphic = new ImageWidget(RIGHT_GRAPHIC);
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		ImageWidget leftGraphic = new ImageWidget(resourceService.getImagePath(LEFT_GRAPHIC));
+		ImageWidget rightGraphic = new ImageWidget(resourceService.getImagePath(RIGHT_GRAPHIC));
 
 		int sideGraphicWidth = (int) (Theme.SIDE_GRAPHIC_WIDTH * dpWidth);
 		int sideGraphicHeight = (int) (Theme.SIDE_GRAPHIC_HEIGHT * dpHeight);
@@ -116,7 +118,7 @@ public class StopwatchDesktop extends RenderableDesktop {
 		int dpWidth = Display.getDisplay().getWidth();
 		int dpHeight = Display.getDisplay().getHeight();
 
-		VectorFont font = VectorFont.loadFont(DEFAULT_FONT);
+		VectorFont font = KernelServiceProvider.getFontService().getMonospaceFont();
 		CascadingStylesheet stylesheet = new CascadingStylesheet();
 
 		EditableStyle style = stylesheet.getDefaultStyle();
@@ -124,18 +126,17 @@ public class StopwatchDesktop extends RenderableDesktop {
 		style.setColor(Colors.WHITE);
 		style.setHorizontalAlignment(Alignment.HCENTER);
 		style.setVerticalAlignment(Alignment.VCENTER);
-		style.setExtraObject(VectorLabel.FONT_STYLE, font);
 
 		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.DESKTOP_ROOT));
 		style.setBackground(new RectangularBackground(Colors.BLACK));
 
 		// timer: central
 		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.TIMER_CENTRAL));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, Theme.TIMER_CENTRAL_FONT_SIZE);
+		style.setFont(font.getFont(Theme.TIMER_CENTRAL_FONT_SIZE));
 		style.setDimension(new FixedDimension(Theme.TIMER_CENTRAL_WIDTH, Widget.NO_CONSTRAINT));
 		// timer: sides
 		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.TIMER_SIDE));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, Theme.TIMER_SIDE_FONT_SIZE);
+		style.setFont(font.getFont(Theme.TIMER_SIDE_FONT_SIZE));
 		style.setDimension(new FixedDimension(Theme.TIMER_SIDE_WIDTH, Widget.NO_CONSTRAINT));
 
 		// controls
@@ -178,7 +179,7 @@ public class StopwatchDesktop extends RenderableDesktop {
 		style.setDimension(
 				new FixedDimension((int) (Theme.LAP_ID_WIDTH * dpWidth), (int) (Theme.LAP_ID_HEIGHT * dpHeight)));
 		style.setMargin(new FlexibleOutline(0, 0, (int) (Theme.LAP_ID_OFFSET * dpHeight), 0));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, Theme.LAP_ID_FONT_SIZE);
+		style.setFont(font.getFont(Theme.LAP_ID_FONT_SIZE));
 		// laps: diff
 		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.LAP_DIFF));
 		style.setDimension(
@@ -187,7 +188,7 @@ public class StopwatchDesktop extends RenderableDesktop {
 		// laps: time
 		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.LAP_TIME));
 		style.setDimension(new FixedDimension((int) (Theme.LAP_TIME_WIDTH * dpWidth), Widget.NO_CONSTRAINT));
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, Theme.LAP_TIME_FONT_SIZE);
+		style.setFont(font.getFont(Theme.LAP_TIME_FONT_SIZE));
 
 		return stylesheet;
 	}

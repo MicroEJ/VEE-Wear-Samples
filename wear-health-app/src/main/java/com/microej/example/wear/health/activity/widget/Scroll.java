@@ -256,6 +256,7 @@ public class Scroll extends Container {
 			swipeEventHandler.setMotionFunction(MOTION_FUNCTION);
 			swipeEventHandler.setSwipeListener(this.assistant);
 			swipeEventHandler.moveTo(this.value);
+			swipeEventHandler.setInterpolationRatio(1f);
 			this.swipeEventHandler = swipeEventHandler;
 		}
 	}
@@ -300,8 +301,10 @@ public class Scroll extends Container {
 			this.layOutChild(scrollbar, scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight);
 		}
 
-		layOutChild(child, contentWidth, contentHeight, childOptimalWidth, childOptimalHeight, scrollbarHeight,
-				scrollbarWidth);
+		if (child != null) {
+			layOutChild(child, contentWidth, contentHeight, childOptimalWidth, childOptimalHeight, scrollbarHeight,
+					scrollbarWidth);
+		}
 		return excess;
 	}
 
@@ -311,9 +314,6 @@ public class Scroll extends Container {
 
 	private void layOutChild(Widget child, int contentWidth, int contentHeight, int childOptimalWidth,
 			int childOptimalHeight, int scrollbarHeight, int scrollbarWidth) {
-		if (child == null) {
-			return;
-		}
 		int childX;
 		int childY;
 		int childWidth;

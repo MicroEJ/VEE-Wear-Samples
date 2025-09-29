@@ -1,0 +1,10 @@
+<!--
+	Copyright 2025 MicroEJ Corp.
+    Use of this source code is governed by a BSD-style license that can be found with this software.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="120dp"
+    android:height="280dp" android:viewportWidth="120" android:viewportHeight="280">
+    <path
+        android:pathData="M15,0L105,0Q120,0 120,15L120,265Q120,280 105,280L15,280Q0,280 0,265L0,15Q0,0 15,0Z"
+        android:fillColor="#002A51" />
+</vector>

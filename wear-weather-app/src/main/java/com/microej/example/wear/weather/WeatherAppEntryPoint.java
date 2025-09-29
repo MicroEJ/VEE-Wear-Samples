@@ -6,6 +6,7 @@ package com.microej.example.wear.weather;
 
 import com.microej.example.wear.weather.activity.WeatherActivity;
 import com.microej.wear.KernelServiceProvider;
+
 import ej.kf.FeatureEntryPoint;
 
 /**

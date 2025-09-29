@@ -10,13 +10,18 @@ import com.microej.example.wear.stopwatch.model.Lap;
 import com.microej.example.wear.stopwatch.model.StopWatchEventListener;
 import com.microej.example.wear.stopwatch.model.Stopwatch;
 import com.microej.example.wear.stopwatch.model.TimerState;
+import com.microej.wear.KernelServiceProvider;
+import com.microej.wear.services.ResourceService;
+
+import ej.annotation.Nullable;
 import ej.microui.MicroUI;
 import ej.microui.display.Colors;
 import ej.microui.display.GraphicsContext;
-import ej.microui.display.Image;
 import ej.microui.display.Painter;
+import ej.microui.display.ResourceImage;
 import ej.mwt.Widget;
 import ej.widget.basic.ImageWidget;
+import ej.widget.basic.Label;
 import ej.widget.container.LayoutOrientation;
 import ej.widget.container.SimpleDock;
 
@@ -36,8 +41,10 @@ public class LapScrollWidget extends Scroll implements StopWatchEventListener {
 	private final Stopwatch stopwatch;
 	private final ScrollableList list;
 	private final SpacerWidget padding;
-	private final Image bottomGradient;
-	private final Image topGradient;
+	@Nullable
+	private ResourceImage topGradient;
+	@Nullable
+	private ResourceImage bottomGradient;
 
 	/**
 	 * Creates a lap list widget.
@@ -50,8 +57,6 @@ public class LapScrollWidget extends Scroll implements StopWatchEventListener {
 
 		stopwatch.addListener(this);
 
-		this.topGradient = Image.getImage(TOP_GRADIENT);
-		this.bottomGradient = Image.getImage(BOTTOM_GRADIENT);
 		this.stopwatch = stopwatch;
 		this.list = new ScrollableList(LayoutOrientation.VERTICAL, false);
 		this.padding = new SpacerWidget(PADDING_HEIGHT, LayoutOrientation.VERTICAL);
@@ -121,17 +126,18 @@ public class LapScrollWidget extends Scroll implements StopWatchEventListener {
 		lapWidget.addClassSelector(ClassIdentifiers.LAP);
 
 		String idString = Integer.toString(id);
-		VectorLabel idLabel = new VectorLabel(idString);
+		Label idLabel = new Label(idString);
 		idLabel.addClassSelector(ClassIdentifiers.LAP_ID);
 		lapWidget.setFirstChild(idLabel);
 
 		boolean isImprovement = id == 1 || lap.getDelta() < 0;
-		ImageWidget diffIcon = new ImageWidget(isImprovement ? PLUS_ICON : MINUS_ICON);
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		ImageWidget diffIcon = new ImageWidget(resourceService.getImagePath(isImprovement ? PLUS_ICON : MINUS_ICON));
 		diffIcon.addClassSelector(ClassIdentifiers.LAP_DIFF);
 		lapWidget.setCenterChild(diffIcon);
 
 		String timeString = TimeFormatter.format(lap.getTime());
-		VectorLabel time = new VectorLabel(timeString);
+		Label time = new Label(timeString);
 		time.addClassSelector(ClassIdentifiers.LAP_TIME);
 		lapWidget.setLastChild(time);
 
@@ -139,8 +145,28 @@ public class LapScrollWidget extends Scroll implements StopWatchEventListener {
 	}
 
 	@Override
+	protected void onAttached() {
+		super.onAttached();
+
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		this.topGradient = ResourceImage.loadImage(resourceService.getImagePath(TOP_GRADIENT));
+		this.bottomGradient = ResourceImage.loadImage(resourceService.getImagePath(BOTTOM_GRADIENT));
+	}
+
+	@Override
 	protected void onDetached() {
 		super.onDetached();
+
+		ResourceImage image = this.topGradient;
+		if (image != null) {
+			image.close();
+			this.topGradient = null;
+		}
+		image = this.bottomGradient;
+		if (image != null) {
+			image.close();
+			this.bottomGradient = null;
+		}
 
 		this.stopwatch.removeListener(this);
 	}
@@ -191,14 +217,18 @@ public class LapScrollWidget extends Scroll implements StopWatchEventListener {
 
 		// draw gradient on top (repeated to spare space)
 		g.setColor(Colors.BLACK);
-		for (int i = 0; i * this.topGradient.getWidth() < width; i++) {
-			Painter.drawImage(g, this.topGradient, i * this.topGradient.getWidth(), 0);
+		ResourceImage image = this.topGradient;
+		assert (image != null);
+		for (int i = 0; i * image.getWidth() < width; i++) {
+			Painter.drawImage(g, image, i * image.getWidth(), 0);
 		}
 
 		// draw gradient on the bottom (repeated to spare space)
-		int bgY = contentHeight - this.bottomGradient.getHeight();
-		for (int i = 0; i * this.bottomGradient.getWidth() < width; i++) {
-			Painter.drawImage(g, this.bottomGradient, i * this.bottomGradient.getWidth(), bgY);
+		image = this.bottomGradient;
+		assert (image != null);
+		int bgY = contentHeight - image.getHeight();
+		for (int i = 0; i * image.getWidth() < width; i++) {
+			Painter.drawImage(g, image, i * image.getWidth(), bgY);
 		}
 	}
 }

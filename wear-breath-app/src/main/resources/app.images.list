@@ -1,0 +1,7 @@
+# Copyright 2025 MicroEJ Corp.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+/images/ic_breath_135_b.png:DISPLAY
+/images/ic_breath_314_b.png:DISPLAY
+
+/images/linear_gradient.png:A8

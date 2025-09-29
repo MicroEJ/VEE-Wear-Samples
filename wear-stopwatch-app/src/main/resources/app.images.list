@@ -10,8 +10,8 @@
 /images/icon_lap_plus.png:ARGB4444_PRE
 /images/icon_lap_minus.png:ARGB4444_PRE
 
-/images/top_gradient.png:A8
-/images/bottom_gradient.png:A8
+/images/top_gradient.png:A8:alpha
+/images/bottom_gradient.png:A8:alpha
 
 /images/left_graphic.png:DISPLAY
 /images/right_graphic.png:DISPLAY

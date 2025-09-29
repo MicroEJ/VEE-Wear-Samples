@@ -5,6 +5,7 @@
 package com.microej.example.wear.health.datasource;
 
 import com.microej.wear.components.ComplicationDataSource;
+
 import ej.microui.display.GraphicsContext;
 
 /**
@@ -29,6 +30,16 @@ public class DefaultComplicationDataSource implements ComplicationDataSource {
 
 	@Override
 	public String getText() {
+		throw new IllegalStateException();
+	}
+
+	@Override
+	public void onIconAttached() {
+		throw new IllegalStateException();
+	}
+
+	@Override
+	public void onIconDetached() {
 		throw new IllegalStateException();
 	}
 

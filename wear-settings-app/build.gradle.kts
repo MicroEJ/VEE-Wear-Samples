@@ -29,4 +29,5 @@ dependencies {
 	implementation(libs.microej.veewear.util)
 
 	microejVee(rootProject.extra.get("kernel") as String)
+	microejApplication(project(":wear-system-app"))
 }

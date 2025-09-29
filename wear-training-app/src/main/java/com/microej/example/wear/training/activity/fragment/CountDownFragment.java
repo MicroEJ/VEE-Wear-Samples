@@ -7,11 +7,11 @@ package com.microej.example.wear.training.activity.fragment;
 import com.microej.example.wear.training.activity.TrainingDesktop;
 import com.microej.example.wear.training.activity.style.ClassIdentifiers;
 import com.microej.example.wear.training.activity.widget.CircleArc;
-import com.microej.example.wear.training.activity.widget.VectorLabel;
 import com.microej.example.wear.training.activity.widget.VectorRadialProgressWidget;
 import com.microej.example.wear.training.model.Training;
 import com.microej.wear.KernelServiceProvider;
 
+import ej.annotation.Nullable;
 import ej.bon.Util;
 import ej.drawing.ShapePainter;
 import ej.microui.display.Colors;
@@ -29,6 +29,7 @@ import ej.mwt.style.background.RectangularBackground;
 import ej.mwt.stylesheet.cascading.CascadingStylesheet;
 import ej.mwt.stylesheet.selector.ClassSelector;
 import ej.mwt.util.Alignment;
+import ej.widget.basic.Label;
 import ej.widget.container.Canvas;
 import ej.widget.motion.MotionAnimation;
 import ej.widget.motion.MotionAnimationListener;
@@ -58,13 +59,14 @@ public class CountDownFragment extends Canvas {
 	private static final int COUNTDOWN_ENDING_VALUE = 1;
 	private static final float COUNTDOWN_LABEL_Y_RATIO = 0.3f;
 	private static final String COUNTDOWN_PATTERN_STRING = "10";
-
+	private final Training training;
 	/* Countdown fields */
-	private VectorLabel countDownLabel;
+	private final Label countDownLabel;
 	private VectorRadialProgressWidget radialProgressWidget;
 	private int countDownValue;
 	private boolean countdownEnded;
-	private final Training training;
+
+	@Nullable
 	private MotionAnimation countDownAnimation;
 
 	/**
@@ -77,7 +79,61 @@ public class CountDownFragment extends Canvas {
 		this.training = training;
 		this.countdownEnded = false;
 		this.countDownValue = CountDownFragment.COUNTDOWN_STARTING_VALUE;
+		this.radialProgressWidget = new VectorRadialProgressWidget(CountDownFragment.CYCLE_DURATION);
+		this.countDownLabel = new Label(String.valueOf(this.countDownValue));
+		this.countDownLabel.addClassSelector(ClassIdentifiers.COUNTDOWN_VALUE);
 		buildUI(this);
+	}
+
+	private static VectorRadialProgressWidget addRadialProgressWidget(Canvas canvas, int availableSize, int centerX,
+			int centerY) {
+		int size = (int) (availableSize * CountDownFragment.COUNTDOWN_PROGRESS_RATIO);
+		int x = Alignment.computeLeftX(size, centerX, Alignment.HCENTER);
+		int y = Alignment.computeTopY(size, centerY, Alignment.VCENTER);
+
+		VectorRadialProgressWidget progressBar = new VectorRadialProgressWidget(CountDownFragment.CYCLE_DURATION);
+		canvas.addChild(progressBar, x, y, size, size);
+
+		return progressBar;
+	}
+
+	/**
+	 * Countdown fragment styles.
+	 *
+	 * @param stylesheet
+	 *            the main style sheet instance.
+	 */
+	public static void appendStyles(CascadingStylesheet stylesheet) {
+
+		VectorFont font = TrainingDesktop.getFont();
+		Display display = Display.getDisplay();
+		int displaySize = Math.min(display.getWidth(), display.getHeight());
+		int fontSize = (int) (CountDownFragment.FONT_SIZE_RATIO * displaySize);
+		int arcThicknessSize = (int) (displaySize * CountDownFragment.ARC_THICKNESS_RATIO);
+
+		// default style
+		EditableStyle style = stylesheet.getDefaultStyle();
+		style.setBackground(NoBackground.NO_BACKGROUND);
+
+		// root widget style
+		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.ROOT_WIDGET));
+		style.setBackground(new RectangularBackground(Colors.BLACK));
+
+		// Radial progress style
+		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.RADIAL_PROGRESS));
+		CircleArc.CircleArcBuilder circleArcBuilder = new CircleArc.CircleArcBuilder(
+				CountDownFragment.RADIAL_PROGRESS_GRADIENT, arcThicknessSize, ShapePainter.Cap.PERPENDICULAR);
+		style.setExtraObject(VectorRadialProgressWidget.CIRCLE_ARC_STYLE, circleArcBuilder);
+		circleArcBuilder = new CircleArc.CircleArcBuilder(CountDownFragment.ARC_BACKGROUND_COLOR, arcThicknessSize,
+				ShapePainter.Cap.PERPENDICULAR);
+		style.setExtraObject(VectorRadialProgressWidget.BACKGROUND_CIRCLE_ARC_STYLE, circleArcBuilder);
+
+		// Countdown label style
+
+		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.COUNTDOWN_VALUE));
+		style.setFont(font.getFont(fontSize));
+		style.setHorizontalAlignment(Alignment.HCENTER);
+		style.setColor(Colors.WHITE);
 	}
 
 	/**
@@ -103,30 +159,15 @@ public class CountDownFragment extends Canvas {
 		int fontHeight = (int) font.getHeight(fontSize);
 		int labelWidth = (int) font.measureStringWidth(CountDownFragment.COUNTDOWN_PATTERN_STRING, fontSize);
 
-		this.radialProgressWidget = CountDownFragment.addRadialProgressWidget(canvas, displaySize,
-				CountDownFragment.COUNTDOWN_PROGRESS_RATIO, centerX, centerY);
+		this.radialProgressWidget = CountDownFragment.addRadialProgressWidget(canvas, displaySize, centerX, centerY);
 		this.radialProgressWidget.addClassSelector(ClassIdentifiers.RADIAL_PROGRESS);
 
 		// countdown value
-		VectorLabel countdownValueLabel = new VectorLabel(String.valueOf(this.countDownValue));
-		countdownValueLabel.addClassSelector(ClassIdentifiers.COUNTDOWN_VALUE);
+
 		int countDownY = (int) (CountDownFragment.COUNTDOWN_LABEL_Y_RATIO * displaySize);
 		int countDownX = Alignment.computeLeftX(labelWidth, 0, displaySize, Alignment.HCENTER);
 
-		canvas.addChild(countdownValueLabel, countDownX, countDownY, labelWidth, fontHeight);
-		this.countDownLabel = countdownValueLabel;
-	}
-
-	private static VectorRadialProgressWidget addRadialProgressWidget(Canvas canvas, int availableSize,
-			float widgetRatio, int centerX, int centerY) {
-		int size = (int) (availableSize * widgetRatio);
-		int x = Alignment.computeLeftX(size, centerX, Alignment.HCENTER);
-		int y = Alignment.computeTopY(size, centerY, Alignment.VCENTER);
-
-		VectorRadialProgressWidget progressBar = new VectorRadialProgressWidget(CountDownFragment.CYCLE_DURATION);
-		canvas.addChild(progressBar, x, y, size, size);
-
-		return progressBar;
+		canvas.addChild(this.countDownLabel, countDownX, countDownY, labelWidth, fontHeight);
 	}
 
 	@Override
@@ -176,8 +217,9 @@ public class CountDownFragment extends Canvas {
 	}
 
 	private void stopCountDownAnimation() {
-		if (!this.countdownEnded) {
-			this.countDownAnimation.stop();
+		MotionAnimation animation = this.countDownAnimation;
+		if (!this.countdownEnded && animation != null) {
+			animation.stop();
 		}
 	}
 
@@ -186,55 +228,15 @@ public class CountDownFragment extends Canvas {
 		Motion timeMotion = new Motion(function, CountDownFragment.STARTING_CYCLE_VALUE,
 				CountDownFragment.CYCLE_DURATION, CountDownFragment.CYCLE_DURATION);
 		Animator animator = getDesktop().getAnimator();
-		this.countDownAnimation = new MotionAnimation(animator, timeMotion, new MotionAnimationListener() {
+		MotionAnimation animation = new MotionAnimation(animator, timeMotion, new MotionAnimationListener() {
 			@Override
 			public void tick(int value, boolean finished) {
 				updateTime(value, finished);
 				CountDownFragment.this.requestRender();
 			}
 		});
-		this.countDownAnimation.start();
-	}
-
-	/**
-	 * Countdown fragment styles.
-	 *
-	 * @param stylesheet
-	 *            the main style sheet instance.
-	 */
-	public static void appendStyles(CascadingStylesheet stylesheet) {
-
-		VectorFont font = TrainingDesktop.getFont();
-		Display display = Display.getDisplay();
-		int displaySize = Math.min(display.getWidth(), display.getHeight());
-		int fontSize = (int) (CountDownFragment.FONT_SIZE_RATIO * displaySize);
-		int arcThicknessSize = (int) (displaySize * CountDownFragment.ARC_THICKNESS_RATIO);
-
-		// default style
-		EditableStyle style = stylesheet.getDefaultStyle();
-		style.setBackground(NoBackground.NO_BACKGROUND);
-
-		// root widget style
-		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.ROOT_WIDGET));
-		style.setBackground(new RectangularBackground(Colors.BLACK));
-
-		// Radial progress style
-		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.RADIAL_PROGRESS));
-		CircleArc.CircleArcBuilder circleArcBuilder = new CircleArc.CircleArcBuilder(
-				CountDownFragment.RADIAL_PROGRESS_GRADIENT, arcThicknessSize, ShapePainter.Cap.PERPENDICULAR);
-		style.setExtraObject(VectorRadialProgressWidget.CIRCLE_ARC_STYLE, circleArcBuilder);
-		circleArcBuilder = new CircleArc.CircleArcBuilder(CountDownFragment.ARC_BACKGROUND_COLOR, arcThicknessSize,
-				ShapePainter.Cap.PERPENDICULAR);
-		style.setExtraObject(VectorRadialProgressWidget.BACKGROUND_CIRCLE_ARC_STYLE, circleArcBuilder);
-
-		// Countdown label style
-
-		style = stylesheet.getSelectorStyle(new ClassSelector(ClassIdentifiers.COUNTDOWN_VALUE));
-		style.setExtraObject(VectorLabel.FONT_STYLE, font);
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, fontSize);
-		style.setHorizontalAlignment(Alignment.HCENTER);
-		style.setColor(Colors.WHITE);
-
+		animation.start();
+		this.countDownAnimation = animation;
 	}
 
 }

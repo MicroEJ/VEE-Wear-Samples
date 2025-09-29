@@ -5,8 +5,11 @@
 package com.microej.example.wear.settings.activity.widget;
 
 import com.microej.wear.KernelServiceProvider;
+import com.microej.wear.services.ResourceService;
+
+import ej.annotation.Nullable;
 import ej.microui.display.GraphicsContext;
-import ej.microui.display.Image;
+import ej.microui.display.ResourceImage;
 import ej.microui.event.Event;
 import ej.microui.event.generator.Buttons;
 import ej.microui.event.generator.Pointer;
@@ -37,10 +40,10 @@ public class RadioButton extends Widget {
 
 	private final String text;
 	private final RadioButtonGroup group;
-
-	private final Image radioImage;
-
-	private final Image radioFillImage;
+	@Nullable
+	private ResourceImage radioImage;
+	@Nullable
+	private ResourceImage radioFillImage;
 
 	/**
 	 * Creates a radio button with the given text to display.
@@ -54,8 +57,30 @@ public class RadioButton extends Widget {
 		super(true);
 		this.text = text;
 		this.group = group;
-		this.radioImage = Image.getImage("/images/ic_radio.png");
-		this.radioFillImage = Image.getImage("/images/ic_radio_fill.png");
+	}
+
+	@Override
+	protected void onAttached() {
+		super.onAttached();
+		ResourceService resourceService = KernelServiceProvider.getResourceService();
+		this.radioImage = ResourceImage.loadImage(resourceService.getImagePath("/images/ic_radio.png"));
+		this.radioFillImage = ResourceImage.loadImage(resourceService.getImagePath("/images/ic_radio_fill.png"));
+	}
+
+	@Override
+	protected void onDetached() {
+		super.onDetached();
+
+		ResourceImage image = this.radioImage;
+		if (image != null) {
+			image.close();
+			this.radioImage = null;
+		}
+		image = this.radioFillImage;
+		if (image != null) {
+			image.close();
+			this.radioFillImage = null;
+		}
 	}
 
 	@Override
@@ -70,12 +95,18 @@ public class RadioButton extends Widget {
 		g.setColor(style.getColor());
 		VectorGraphicsPainter.drawString(g, this.text, font, fontSize, textX, textY);
 
-		int radioX = contentWidth - this.radioImage.getWidth() - 10;
-		ImagePainter.drawImageInArea(g, this.radioImage, radioX, 0, this.radioImage.getWidth(), contentHeight,
-				Alignment.HCENTER, Alignment.VCENTER);
+		ResourceImage tempImage = this.radioImage;
+		assert (tempImage != null);
+
+		int radioX = contentWidth - tempImage.getWidth() - 10;
+		ImagePainter.drawImageInArea(g, tempImage, radioX, 0, tempImage.getWidth(), contentHeight, Alignment.HCENTER,
+				Alignment.VCENTER);
+
+		ResourceImage tempFillImage = this.radioFillImage;
+		assert (tempFillImage != null);
 
 		if (this.group.isChecked(this)) {
-			ImagePainter.drawImageInArea(g, this.radioFillImage, radioX, 0, this.radioImage.getWidth(), contentHeight,
+			ImagePainter.drawImageInArea(g, tempFillImage, radioX, 0, tempImage.getWidth(), contentHeight,
 					Alignment.HCENTER, Alignment.VCENTER);
 		}
 
@@ -91,7 +122,9 @@ public class RadioButton extends Widget {
 		Style style = getStyle();
 		VectorFont font = getFont(style);
 		int fontSize = style.getExtraInt(TEXT_SIZE_STYLE, DEFAULT_TEXT_SIZE);
-		int radioHeight = this.radioImage.getHeight();
+		ResourceImage image = this.radioImage;
+		assert (image != null);
+		int radioHeight = image.getHeight();
 		int height = Math.max(radioHeight, (int) font.getHeight(fontSize) + 1);
 		size.setSize((int) font.measureStringWidth(this.text, fontSize), height);
 	}

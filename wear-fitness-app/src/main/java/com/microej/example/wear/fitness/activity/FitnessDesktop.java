@@ -6,10 +6,10 @@ package com.microej.example.wear.fitness.activity;
 
 import com.microej.example.wear.fitness.activity.widget.CircleArc;
 import com.microej.example.wear.fitness.activity.widget.VectorCircularProgressBar;
-import com.microej.example.wear.fitness.activity.widget.VectorLabel;
 import com.microej.wear.KernelServiceProvider;
 import com.microej.wear.services.HealthService;
 import com.microej.wear.util.renderable.RenderableDesktop;
+
 import ej.annotation.Nullable;
 import ej.bon.TimerTask;
 import ej.drawing.ShapePainter;
@@ -27,6 +27,7 @@ import ej.mwt.stylesheet.cascading.CascadingStylesheet;
 import ej.mwt.stylesheet.selector.ClassSelector;
 import ej.mwt.stylesheet.selector.TypeSelector;
 import ej.mwt.util.Alignment;
+import ej.widget.basic.Label;
 import ej.widget.container.Canvas;
 import ej.widget.motion.MotionAnimation;
 import ej.widget.motion.MotionAnimationListener;
@@ -66,8 +67,8 @@ public final class FitnessDesktop extends RenderableDesktop {
 
 	private final VectorCircularProgressBar stepsProgressBar;
 	private final VectorCircularProgressBar caloriesProgressBar;
-	private final VectorLabel stepLabel;
-	private final VectorLabel caloriesLabel;
+	private final Label stepLabel;
+	private final Label caloriesLabel;
 	@Nullable
 	private TimerTask task;
 
@@ -98,7 +99,7 @@ public final class FitnessDesktop extends RenderableDesktop {
 		this.caloriesProgressBar.addClassSelector(CALORIES_PROGRESS);
 
 		// steps title
-		VectorLabel stepsTitleLabel = new VectorLabel(STEPS);
+		Label stepsTitleLabel = new Label(STEPS);
 		stepsTitleLabel.addClassSelector(TITLE);
 		int labelX = (int) (LABEL_X_RATIO * displaySize);
 		int labelY = (int) (TITLE_STEPS_Y_RATIO * displaySize);
@@ -106,21 +107,21 @@ public final class FitnessDesktop extends RenderableDesktop {
 
 		// steps value
 		String stepsValue = getStepsText(healthService);
-		VectorLabel stepsValueLabel = new VectorLabel(stepsValue);
+		Label stepsValueLabel = new Label(stepsValue);
 		stepsValueLabel.addClassSelector(STEPS_VALUE);
 		labelY += fontHeight;
 		canvas.addChild(stepsValueLabel, labelX, labelY, labelWidth, fontHeight);
 		this.stepLabel = stepsValueLabel;
 
 		// calories title
-		VectorLabel caloriesTitleLabel = new VectorLabel(CALORIES);
+		Label caloriesTitleLabel = new Label(CALORIES);
 		caloriesTitleLabel.addClassSelector(TITLE);
 		labelY = (int) (TITLE_CALORIES_Y_RATIO * displaySize);
 		canvas.addChild(caloriesTitleLabel, labelX, labelY, labelWidth, fontHeight);
 
 		// calories value
 		String caloriesValue = getCaloriesText(healthService);
-		VectorLabel caloriesValueLabel = new VectorLabel(caloriesValue);
+		Label caloriesValueLabel = new Label(caloriesValue);
 		caloriesValueLabel.addClassSelector(CALORIES_VALUE);
 		labelY += fontHeight;
 		canvas.addChild(caloriesValueLabel, labelX, labelY, labelWidth, fontHeight);
@@ -128,6 +129,82 @@ public final class FitnessDesktop extends RenderableDesktop {
 
 		setStylesheet(createStylesheet());
 		setWidget(canvas);
+	}
+
+	private static VectorCircularProgressBar addProgressBar(Canvas canvas, int availableSize, float widgetRatio,
+			int centerX, int centerY) {
+		int size = (int) (availableSize * widgetRatio);
+		int x = Alignment.computeLeftX(size, centerX, Alignment.HCENTER);
+		int y = Alignment.computeTopY(size, centerY, Alignment.VCENTER);
+
+		VectorCircularProgressBar progressBar = new VectorCircularProgressBar(0, PROGRESS_BAR_START_ANGLE,
+				PROGRESS_BAR_MAX_ANGLE);
+		canvas.addChild(progressBar, x, y, size, size);
+		return progressBar;
+	}
+
+	private static Stylesheet createStylesheet() {
+		CascadingStylesheet stylesheet = new CascadingStylesheet();
+		VectorFont font = getFont();
+		Display display = Display.getDisplay();
+		int displaySize = Math.min(display.getWidth(), display.getHeight());
+		int fontSize = (int) (FONT_SIZE_RATIO * displaySize);
+
+		// default style
+		EditableStyle style = stylesheet.getDefaultStyle();
+		style.setBackground(NoBackground.NO_BACKGROUND);
+
+		// root widget style
+		style = stylesheet.getSelectorStyle(new ClassSelector(ROOT_WIDGET));
+		style.setBackground(new RectangularBackground(Colors.BLACK));
+
+		// steps progress style
+		style = stylesheet.getSelectorStyle(new ClassSelector(STEPS_PROGRESS));
+		CircleArc.GradientStyle gradientStyle = new CircleArc.GradientStyle(new int[] { 0xffff0056, 0xffffc800 },
+				new float[] { 0.04f, 1 }, -160);
+		CircleArc.CircleArcBuilder circleArcBuilder = new CircleArc.CircleArcBuilder(gradientStyle, ARC_THICKNESS,
+				ShapePainter.Cap.ROUNDED);
+		style.setExtraObject(VectorCircularProgressBar.CIRCLE_ARC_STYLE, circleArcBuilder);
+		circleArcBuilder = new CircleArc.CircleArcBuilder(ARC_BACKGROUND_COLOR, ARC_THICKNESS,
+				ShapePainter.Cap.ROUNDED);
+		style.setExtraObject(VectorCircularProgressBar.BACKGROUND_CIRCLE_ARC_STYLE, circleArcBuilder);
+
+		// calories progress style
+		style = stylesheet.getSelectorStyle(new ClassSelector(CALORIES_PROGRESS));
+		gradientStyle = new CircleArc.GradientStyle(new int[] { 0xff29a1d8, 0xff29a1d8, 0xffb70079, 0xffff008a },
+				new float[] { 0, 0.4f, 0.9f, 1 }, -15);
+		circleArcBuilder = new CircleArc.CircleArcBuilder(gradientStyle, ARC_THICKNESS, ShapePainter.Cap.ROUNDED);
+		style.setExtraObject(VectorCircularProgressBar.CIRCLE_ARC_STYLE, circleArcBuilder);
+		circleArcBuilder = new CircleArc.CircleArcBuilder(ARC_BACKGROUND_COLOR, ARC_THICKNESS,
+				ShapePainter.Cap.ROUNDED);
+		style.setExtraObject(VectorCircularProgressBar.BACKGROUND_CIRCLE_ARC_STYLE, circleArcBuilder);
+
+		style = stylesheet.getSelectorStyle(new TypeSelector(Label.class));
+		style.setColor(Colors.WHITE);
+		style.setFont(font.getFont(fontSize));
+
+		style = stylesheet.getSelectorStyle(new ClassSelector(TITLE));
+		style.setColor(Colors.WHITE);
+
+		style = stylesheet.getSelectorStyle(new ClassSelector(STEPS_VALUE));
+		style.setColor(0xffffc800);
+
+		style = stylesheet.getSelectorStyle(new ClassSelector(CALORIES_VALUE));
+		style.setColor(0xff29a1d8);
+
+		return stylesheet;
+	}
+
+	private static String getCaloriesText(HealthService healthService) {
+		return healthService.getCalories() + "/" + CALORIES_GOAL;
+	}
+
+	private static String getStepsText(HealthService healthService) {
+		return healthService.getSteps() + "/" + STEPS_GOAL;
+	}
+
+	private static VectorFont getFont() {
+		return KernelServiceProvider.getFontService().getBoldItalicFont();
 	}
 
 	@Override
@@ -198,82 +275,5 @@ public final class FitnessDesktop extends RenderableDesktop {
 		this.stepLabel.setText(getStepsText(healthService));
 		this.caloriesLabel.setText(getCaloriesText(healthService));
 		requestRender();
-	}
-
-	private static VectorCircularProgressBar addProgressBar(Canvas canvas, int availableSize, float widgetRatio,
-			int centerX, int centerY) {
-		int size = (int) (availableSize * widgetRatio);
-		int x = Alignment.computeLeftX(size, centerX, Alignment.HCENTER);
-		int y = Alignment.computeTopY(size, centerY, Alignment.VCENTER);
-
-		VectorCircularProgressBar progressBar = new VectorCircularProgressBar(0, PROGRESS_BAR_START_ANGLE,
-				PROGRESS_BAR_MAX_ANGLE);
-		canvas.addChild(progressBar, x, y, size, size);
-		return progressBar;
-	}
-
-	private static Stylesheet createStylesheet() {
-		CascadingStylesheet stylesheet = new CascadingStylesheet();
-		VectorFont font = getFont();
-		Display display = Display.getDisplay();
-		int displaySize = Math.min(display.getWidth(), display.getHeight());
-		int fontSize = (int) (FONT_SIZE_RATIO * displaySize);
-
-		// default style
-		EditableStyle style = stylesheet.getDefaultStyle();
-		style.setBackground(NoBackground.NO_BACKGROUND);
-
-		// root widget style
-		style = stylesheet.getSelectorStyle(new ClassSelector(ROOT_WIDGET));
-		style.setBackground(new RectangularBackground(Colors.BLACK));
-
-		// steps progress style
-		style = stylesheet.getSelectorStyle(new ClassSelector(STEPS_PROGRESS));
-		CircleArc.GradientStyle gradientStyle = new CircleArc.GradientStyle(new int[] { 0xffff0056, 0xffffc800 },
-				new float[] { 0.04f, 1 }, -160);
-		CircleArc.CircleArcBuilder circleArcBuilder = new CircleArc.CircleArcBuilder(gradientStyle, ARC_THICKNESS,
-				ShapePainter.Cap.ROUNDED);
-		style.setExtraObject(VectorCircularProgressBar.CIRCLE_ARC_STYLE, circleArcBuilder);
-		circleArcBuilder = new CircleArc.CircleArcBuilder(ARC_BACKGROUND_COLOR, ARC_THICKNESS,
-				ShapePainter.Cap.ROUNDED);
-		style.setExtraObject(VectorCircularProgressBar.BACKGROUND_CIRCLE_ARC_STYLE, circleArcBuilder);
-
-		// calories progress style
-		style = stylesheet.getSelectorStyle(new ClassSelector(CALORIES_PROGRESS));
-		gradientStyle = new CircleArc.GradientStyle(new int[] { 0xff29a1d8, 0xff29a1d8, 0xffb70079, 0xffff008a },
-				new float[] { 0, 0.4f, 0.9f, 1 }, -15);
-		circleArcBuilder = new CircleArc.CircleArcBuilder(gradientStyle, ARC_THICKNESS, ShapePainter.Cap.ROUNDED);
-		style.setExtraObject(VectorCircularProgressBar.CIRCLE_ARC_STYLE, circleArcBuilder);
-		circleArcBuilder = new CircleArc.CircleArcBuilder(ARC_BACKGROUND_COLOR, ARC_THICKNESS,
-				ShapePainter.Cap.ROUNDED);
-		style.setExtraObject(VectorCircularProgressBar.BACKGROUND_CIRCLE_ARC_STYLE, circleArcBuilder);
-
-		style = stylesheet.getSelectorStyle(new TypeSelector(VectorLabel.class));
-		style.setColor(Colors.WHITE);
-		style.setExtraObject(VectorLabel.FONT_STYLE, font);
-		style.setExtraInt(VectorLabel.TEXT_SIZE_STYLE, fontSize);
-
-		style = stylesheet.getSelectorStyle(new ClassSelector(TITLE));
-		style.setColor(Colors.WHITE);
-
-		style = stylesheet.getSelectorStyle(new ClassSelector(STEPS_VALUE));
-		style.setColor(0xffffc800);
-
-		style = stylesheet.getSelectorStyle(new ClassSelector(CALORIES_VALUE));
-		style.setColor(0xff29a1d8);
-
-		return stylesheet;
-	}
-
-	private static String getCaloriesText(HealthService healthService) {
-		return healthService.getCalories() + "/" + CALORIES_GOAL;
-	}
-
-	private static String getStepsText(HealthService healthService) {
-		return healthService.getSteps() + "/" + STEPS_GOAL;
-	}
-
-	private static VectorFont getFont() {
-		return KernelServiceProvider.getFontService().getBoldItalicFont();
 	}
 }

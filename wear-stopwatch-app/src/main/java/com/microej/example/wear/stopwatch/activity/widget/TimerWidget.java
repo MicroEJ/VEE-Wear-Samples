@@ -13,6 +13,7 @@ import com.microej.example.wear.stopwatch.model.TimerState;
 import ej.bon.Util;
 import ej.mwt.animation.Animation;
 import ej.mwt.animation.Animator;
+import ej.widget.basic.Label;
 import ej.widget.container.LayoutOrientation;
 import ej.widget.container.SimpleDock;
 
@@ -29,9 +30,9 @@ public class TimerWidget extends SimpleDock implements StopWatchEventListener {
 	private final Animator animator;
 	private final Animation count;
 	private final Stopwatch stopwatch;
-	private final VectorLabel hoursLabel;
-	private final VectorLabel centralLabel;
-	private final VectorLabel millisLabel;
+	private final Label hoursLabel;
+	private final Label centralLabel;
+	private final Label millisLabel;
 	private boolean isRunning;
 	private long lastMeasuredTime;
 
@@ -53,13 +54,13 @@ public class TimerWidget extends SimpleDock implements StopWatchEventListener {
 		this.lastMeasuredTime = 0;
 
 		// layout
-		this.hoursLabel = new VectorLabel();
+		this.hoursLabel = new Label();
 		this.hoursLabel.addClassSelector(ClassIdentifiers.TIMER_SIDE);
 		setFirstChild(this.hoursLabel);
-		this.centralLabel = new VectorLabel();
+		this.centralLabel = new Label();
 		this.centralLabel.addClassSelector(ClassIdentifiers.TIMER_CENTRAL);
 		setCenterChild(this.centralLabel);
-		this.millisLabel = new VectorLabel();
+		this.millisLabel = new Label();
 		this.millisLabel.addClassSelector(ClassIdentifiers.TIMER_SIDE);
 		setLastChild(this.millisLabel);
 		// set up the counting animation

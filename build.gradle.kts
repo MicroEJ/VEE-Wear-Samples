@@ -5,7 +5,7 @@
 
 import com.microej.gradle.plugins.MicroejExtension
 
-ext.set("samplesVersion", "1.4.1")
+ext.set("samplesVersion", "2.0.0")
 
 plugins {
 	alias(libs.plugins.microej.application) apply false
@@ -22,7 +22,7 @@ allprojects {
 				skippedCheckers = "changelog"
 			}
 		}
+
+		tasks.findByName("shrinkRuntimeEnvironment")?.enabled = false // see M0090IDE-5189
 	}
 }
-
-

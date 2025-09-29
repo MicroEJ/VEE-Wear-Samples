@@ -45,9 +45,9 @@ public class HeartRateZone extends Widget {
 	 */
 	public static final int WIDGET_HEIGHT = 2;
 	private static final String ZONE = "ZONE ";
-	private static final String CURSOR_ICON_PATH = "/images/cursor.svg";
-	private static final String SELECTED_ZONE_PATH = "/images/selected_zone.svg";
-	private static final String UNSELECTED_ZONE_PATH = "/images/unselected_zone.svg";
+	private static final String CURSOR_ICON_PATH = "/images/cursor.xml";
+	private static final String SELECTED_ZONE_PATH = "/images/selected_zone.xml";
+	private static final String UNSELECTED_ZONE_PATH = "/images/unselected_zone.xml";
 	private static final int CURSOR_HEIGHT = 20;
 	private static final int AREA_HEIGHT = 70;
 	private static final int CURSOR_LEFT_OFFSET = 10;

@@ -6,9 +6,7 @@ package com.microej.example.wear.training.activity.fragment;
 
 import com.microej.example.wear.training.activity.style.ClassIdentifiers;
 import com.microej.example.wear.training.activity.widget.BulletPagingIndicator;
-import com.microej.example.wear.training.activity.widget.scroll.Scroll;
-import com.microej.example.wear.training.activity.widget.scroll.ScrollListener;
-import com.microej.example.wear.training.activity.widget.scroll.ScrollableList;
+import com.microej.example.wear.training.activity.widget.SwipeContainer;
 import com.microej.example.wear.training.model.Training;
 
 import ej.microui.display.Display;
@@ -21,23 +19,18 @@ import ej.mwt.stylesheet.cascading.CascadingStylesheet;
 import ej.mwt.stylesheet.selector.ClassSelector;
 import ej.mwt.util.Alignment;
 import ej.widget.container.Canvas;
-import ej.widget.container.LayoutOrientation;
-import ej.widget.swipe.SwipeListener;
 
 /**
- * A fragment that represents a scrollable horizontal carousel containing different items.
+ * A fragment that represents a swipeable horizontal carousel containing different items.
  */
-public class CarouselFragment extends Canvas implements SwipeListener, ScrollListener {
+public class CarouselFragment extends Canvas {
 	private static final int ITEM_HEART_RATE = 37100;
 	private static final int ITEM_TRAINING = 37101;
-	private static final int SCROLL = 37102;
+	private static final int SWIPE = 37102;
 	private static final int PAGINATION_COLOR = 0xcbd3d7;
 	private static final int LIST_ITEM_MARGIN_SIDES = 0;
 	private static final float WIDGET_WIDTH_RATIO = 0.9872f;
 	private static final int INDICATOR_HEIGHT = 20;
-	private final Training training;
-	private BulletPagingIndicator indicator;
-	private int selectedFragmentIndex;
 	MetricsFragment metricsFragment;
 	HeartRateFragment heartRateFragment;
 
@@ -48,7 +41,10 @@ public class CarouselFragment extends Canvas implements SwipeListener, ScrollLis
 	 *            The training instance used to track training duration.
 	 */
 	public CarouselFragment(Training training) {
-		this.training = training;
+		this.metricsFragment = new MetricsFragment(training);
+		this.metricsFragment.addClassSelector(CarouselFragment.ITEM_TRAINING);
+		this.heartRateFragment = new HeartRateFragment(training);
+		this.heartRateFragment.addClassSelector(CarouselFragment.ITEM_HEART_RATE);
 		buildUI(this);
 	}
 
@@ -64,42 +60,42 @@ public class CarouselFragment extends Canvas implements SwipeListener, ScrollLis
 		Display display = Display.getDisplay();
 		int displayWidth = display.getWidth();
 		int displayHeight = display.getHeight();
-		canvas.addChild(getContentWidget(), 0, 0, displayWidth, displayHeight);
-		addIndicator(canvas, displayWidth, displayHeight);
+		int indicatorY = displayHeight - CarouselFragment.INDICATOR_HEIGHT * 2;
+		int indicatorX = Alignment.computeLeftX(100, 0, displayWidth, Alignment.HCENTER);
+		BulletPagingIndicator indicator = getPagingIndicator();
+		SwipeContainer swipeContainer = getSwipeContainer(indicator);
+		canvas.addChild(swipeContainer, 0, 0, displayWidth, displayHeight);
+		canvas.addChild(indicator, indicatorX, indicatorY, 100, CarouselFragment.INDICATOR_HEIGHT);
 	}
 
 	/**
-	 * Creates and returns the main content widget.
+	 * Creates and returns a SwipeContainer containing children widgets.
 	 *
-	 * @return The root {@link Widget} containing the children widgets.
+	 * @return The root {@link SwipeContainer} containing the children widgets.
 	 */
-	private Widget getContentWidget() {
-		ScrollableList snapList = new ScrollableList(LayoutOrientation.HORIZONTAL, true);
-		this.metricsFragment = new MetricsFragment(this.training);
-		this.metricsFragment.addClassSelector(CarouselFragment.ITEM_TRAINING);
-		this.heartRateFragment = new HeartRateFragment(this.training);
-		this.heartRateFragment.addClassSelector(CarouselFragment.ITEM_HEART_RATE);
-		snapList.addChild(this.metricsFragment);
-		snapList.addChild(this.heartRateFragment);
-		Scroll scroll = new Scroll(LayoutOrientation.HORIZONTAL, this, this);
-		scroll.addClassSelector(CarouselFragment.SCROLL);
-		scroll.setChild(snapList);
-		return scroll;
-	}
-
-	private void addIndicator(Canvas canvas, int displayWidth, int displayHeight) {
-		this.selectedFragmentIndex = 0;
-		this.indicator = new BulletPagingIndicator();
-		this.indicator.setItemsCount(2);
-		this.indicator.setSelectedItem(this.selectedFragmentIndex, 1.0f);
-		this.indicator.addClassSelector(ClassIdentifiers.CAROUSEL_INDICATOR);
-		int labelY = displayHeight - CarouselFragment.INDICATOR_HEIGHT * 2;
-		int labelX = Alignment.computeLeftX(100, 0, displayWidth, Alignment.HCENTER);
-		canvas.addChild(this.indicator, labelX, labelY, 100, CarouselFragment.INDICATOR_HEIGHT);
+	private SwipeContainer getSwipeContainer(BulletPagingIndicator indicator) {
+		SwipeContainer swipeContainer = new SwipeContainer(indicator);
+		swipeContainer.addChildToContainer(this.metricsFragment);
+		swipeContainer.addChildToContainer(this.heartRateFragment);
+		swipeContainer.addClassSelector(CarouselFragment.SWIPE);
+		return swipeContainer;
 	}
 
 	/**
-	 * Caroussel fragment styles.
+	 * Creates and returns a BulletPagingIndicator.
+	 *
+	 * @return A new {@link BulletPagingIndicator} counting two items.
+	 */
+	private BulletPagingIndicator getPagingIndicator() {
+		BulletPagingIndicator indicator = new BulletPagingIndicator();
+		indicator.setItemsCount(2);
+		indicator.setSelectedItem(0, 1.0f);
+		indicator.addClassSelector(ClassIdentifiers.CAROUSEL_INDICATOR);
+		return indicator;
+	}
+
+	/**
+	 * Carousel fragment styles.
 	 *
 	 * @param stylesheet
 	 *            the main style sheet instance.
@@ -119,7 +115,7 @@ public class CarouselFragment extends Canvas implements SwipeListener, ScrollLis
 		style.setPadding(new FlexibleOutline(0, CarouselFragment.LIST_ITEM_MARGIN_SIDES, 0, 0));
 		style.setHorizontalAlignment(Alignment.HCENTER);
 
-		style = stylesheet.getSelectorStyle(new ClassSelector(CarouselFragment.SCROLL));
+		style = stylesheet.getSelectorStyle(new ClassSelector(CarouselFragment.SWIPE));
 		style.setBackground(NoBackground.NO_BACKGROUND);
 		style.setPadding(new FlexibleOutline(0, 0, 0, 0));
 
@@ -128,30 +124,6 @@ public class CarouselFragment extends Canvas implements SwipeListener, ScrollLis
 		style.setColor(CarouselFragment.PAGINATION_COLOR);
 		style.setExtraInt(BulletPagingIndicator.CURSOR_SIZE_STYLE, 7);
 		style.setPadding(new FlexibleOutline(0, 0, 0, 0));
-	}
-
-	@Override
-	public void onSwipeStarted() {
-		this.heartRateFragment.stopUpdateImageTask();
-		stopTasks();
-	}
-
-	@Override
-	public void onSwipeStopped() {
-		this.indicator.setSelectedItem(this.selectedFragmentIndex, 1.0f);
-		this.indicator.requestRender();
-		this.metricsFragment.updateDuration();
-		this.heartRateFragment.updateDuration();
-		startTasks();
-	}
-
-	@Override
-	public void onPositionChanged(int position) {
-		int displayWidth = Display.getDisplay().getWidth();
-		this.selectedFragmentIndex = Math.round((float) position / (float) displayWidth);
-		this.metricsFragment.updateDuration();
-		this.heartRateFragment.updateDuration();
-		stopTasks();
 	}
 
 	private void stopTasks() {
@@ -164,6 +136,12 @@ public class CarouselFragment extends Canvas implements SwipeListener, ScrollLis
 		this.heartRateFragment.startUpdateTask();
 		this.metricsFragment.startUpdateTask();
 		this.heartRateFragment.startUpdateImageTask();
+	}
+
+	@Override
+	protected void onAttached() {
+		super.onAttached();
+		startTasks();
 	}
 
 	@Override

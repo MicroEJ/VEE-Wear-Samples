@@ -44,12 +44,25 @@ Details
    :alt: UX and navigation video
    :target: https://youtu.be/-MYdTW1rGiY
 
+System App
+----------
+
+This application provides a sample implementation of the System UI (navigation, activity launcher, watchface picker).
+The System App is imported by each Sample to allow navigation between them. 
+
 Watchfaces: Flower App & Sport App
 ----------------------------------
 
 These two applications provide respectively a stylish and a sport-like watchface to customize the device.
 
 .. image:: images/watch_faces.png
+
+Breath App
+-----------
+
+This application provides an example for a Guided Breathing Activity.
+
+.. image:: images/breath_app.png
 
 Compass App
 -----------
@@ -77,12 +90,21 @@ Hello World
 
 A simple application displaying 'Hello World' in an independent Activity.
 
+.. image:: images/helloworld_app.png
+
 Settings App
 ------------
 
 This application provides an example for a Settings Activity.
 
 .. image:: images/settings_app.png
+
+Training App
+------------
+
+This application is an example for a Training Activity to monitor heart rate, distance and speed during a training.
+
+.. image:: images/training_app.png
 
 Stopwatch App
 -------------
@@ -91,12 +113,6 @@ This application provides a Stopwatch Activity.
 
 .. image:: images/stopwatch_app.png
 
-Training App
-------------
-
-This application is an example for a Training Activity to monitor heart rate, distance and speed during a training.
-
-.. image:: images/training_app.png
 
 Weather App
 -----------

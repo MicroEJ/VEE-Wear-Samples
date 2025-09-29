@@ -1,0 +1,45 @@
+<!--
+	Copyright 2025 MicroEJ Corp.
+    Use of this source code is governed by a BSD-style license that can be found with this software.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+  <group>
+    <clip-path
+        android:pathData="M0,0h160v160h-160z"/>
+    <path
+        android:pathData="M82.2,73.4C76,59.6 77.6,44.2 85.2,32.4C77.3,31.2 69,32.2 61.2,35.7C39.6,45.5 30,71 39.8,92.6C49.6,114.2 75,123.8 96.6,114C104.4,110.5 110.6,104.9 115,98.1C101.1,96 88.4,87.1 82.2,73.3V73.4Z">
+      <aapt:attr name="android:fillColor">
+        <gradient 
+            android:startX="53.9"
+            android:startY="43.4"
+            android:endX="86.4"
+            android:endY="115.2"
+            android:type="linear">
+          <item android:offset="0" android:color="#FFFFFFB1"/>
+          <item android:offset="1" android:color="#FFE4DD72"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+    <path
+        android:pathData="M53.1,84.6C57.8,84.2 61.2,78.2 60.5,71.3C59.9,64.4 55.5,59.1 50.8,59.5C46.1,59.9 42.7,65.9 43.4,72.8C44,79.7 48.4,85 53.1,84.6Z"
+        android:fillColor="#DDD464"/>
+    <path
+        android:pathData="M69.5,89.9C72,89.9 74,87.9 74,85.4C74,82.9 72,80.9 69.5,80.9C67,80.9 65,82.9 65,85.4C65,87.9 67,89.9 69.5,89.9Z"
+        android:fillColor="#DDD464"/>
+    <path
+        android:pathData="M127.5,127.9C139.4,127.9 149,118.1 149,105.9C149,93.7 139.4,83.9 127.5,83.9C115.6,83.9 106,93.7 106,105.9C106,118.1 115.6,127.9 127.5,127.9Z"
+        android:strokeAlpha="0.8"
+        android:fillColor="#E5E5E5"
+        android:fillAlpha="0.8"/>
+    <path
+        android:pathData="M40.5,127.9C57.9,127.9 72,113.6 72,95.9C72,78.2 57.9,63.9 40.5,63.9C23.1,63.9 9,78.2 9,95.9C9,113.6 23.1,127.9 40.5,127.9Z"
+        android:strokeAlpha="0.8"
+        android:fillColor="#E5E5E5"
+        android:fillAlpha="0.8"/>
+  </group>
+</vector>
