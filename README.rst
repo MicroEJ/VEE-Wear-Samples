@@ -19,7 +19,7 @@ These applications serve as code examples, demonstrating best practices and how 
 Running on Simulator
 --------------------
 
-To run these applications on simulator, download the `VEE Wear Kernel Virtual Device <https://repository.microej.com/packages/wear/wear-kernel/1.3.0>`_.
+To run these applications on simulator, download the `VEE Wear Kernel Virtual Device <https://repository.microej.com/packages/wear/wear-kernel/2.0.2>`_.
 Unzip the Kernel and reference it in the ``build.gradle.kts`` of the application you want to start::
 
 	microejVee(files("path/to/wear-kernel-X.X.X/vee"))

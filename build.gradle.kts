@@ -5,7 +5,7 @@
 
 import com.microej.gradle.plugins.MicroejExtension
 
-ext.set("samplesVersion", "2.0.0")
+ext.set("samplesVersion", "2.0.1")
 
 plugins {
 	alias(libs.plugins.microej.application) apply false
