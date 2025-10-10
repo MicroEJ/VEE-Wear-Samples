@@ -16,10 +16,15 @@ Overview
 This project provides samples of typical smartwatch applications.
 These applications serve as code examples, demonstrating best practices and how to use the VEE Wear Kernel APIs.
 
+.. image:: ../images/demo_vee_wear.png
+	:alt: Illustration of the VEE Wear Kernel and some of the application samples.
+	:width: 60%
+	:align: center
+
 Running on Simulator
 --------------------
 
-To run these applications on simulator, download the `VEE Wear Kernel Virtual Device <https://repository.microej.com/packages/wear/wear-kernel/2.0.2>`_.
+To run these applications on simulator, download the `VEE Wear Kernel Virtual Device <https://repository.microej.com/packages/wear/wear-kernel/2.0.3>`_.
 Unzip the Kernel and reference it in the ``build.gradle.kts`` of the application you want to start::
 
 	microejVee(files("path/to/wear-kernel-X.X.X/vee"))
@@ -42,7 +47,7 @@ Details
 
 .. image:: images/VEE-Wear-Framework_thumbnail.jpg
    :alt: UX and navigation video
-   :target: https://youtu.be/-MYdTW1rGiY
+   :target: https://www.youtube.com/watch?v=0iC9J5mJmRI
 
 System App
 ----------
