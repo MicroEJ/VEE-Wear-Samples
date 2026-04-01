@@ -1,11 +1,11 @@
 /*
- * Copyright 2024-2025 MicroEJ Corp.
+ * Copyright 2024-2026 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
 import com.microej.gradle.plugins.MicroejExtension
 
-ext.set("samplesVersion", "2.0.2")
+ext.set("samplesVersion", "2.0.3")
 
 plugins {
 	alias(libs.plugins.microej.application) apply false

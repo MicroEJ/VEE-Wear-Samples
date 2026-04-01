@@ -1,8 +1,8 @@
-# Copyright 2024-2025 MicroEJ Corp.
+# Copyright 2024-2026 MicroEJ Corp.
 # Use of this source code is governed by a BSD-style license that can be found with this software.
 
 [versions]
-sdk = "1.3.1"
+sdk = "1.5.0"
 wear-services = "2.0.0"
 wear-util = "2.0.0"
 edc = "1.3.7"
